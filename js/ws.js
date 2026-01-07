@@ -97,28 +97,19 @@ async function process_message(name, color, word) {
     }
 
     // нам нужно расчитать ширину полоски в процентах в зависимости от переменной distance. чем меньше distance, тем больше ширина полоски. 2800 distance это 0% ширины, а 1 distance это 100% ширины
-    const width = calculateWidth(distance);
+    // const width = calculateWidth(distance);
     // const width = Math.max(0, 100 - (distance / 2800) * 100);
 
-    const new_message = `
-        <div class="msg" data-distance="${$word_check.distance}">
-
-            <div class="bg" style="width: ${width}%"></div>
-
-            <div class="word-and-distance">
-                <div class="word">${word}</div>
-                <div class="distance">${$word_check.distance}</div>
-            </div>
-
-            <div class="name" style="color: ${color}">${name}</div>
-
-        </div>
-    `;
+    const new_message = message_template(word, $word_check.distance, name, color);
 
     console.log($word_check);
 
     // И добавляем в список
     checked_words.add(word);
+
+    // добавить слово в колонку .guessing .last-words в верх списка
+    const last_words_container = document.querySelector('.guessing .last-words');
+    last_words_container.insertAdjacentHTML('afterbegin', new_message);
 
     // Создаем элемент из HTML строки
     const tempDiv = document.createElement('div');
@@ -149,13 +140,19 @@ async function process_message(name, color, word) {
 }
 
 function message_template(word, distance, name, color) {
+    const width = calculateWidth(distance);
     return `
         <div class="msg" data-distance="${distance}">
-            <div class="bg" style="width: 50%"></div>
+
+            <div class="bg" style="width: ${width}%"></div>
+
             <div class="word-and-distance">
                 <div class="word">${word}</div>
                 <div class="distance">${distance}</div>
             </div>
+
+            <div class="name" style="color: ${color}">${name}</div>
+
         </div>
     `;
 }
