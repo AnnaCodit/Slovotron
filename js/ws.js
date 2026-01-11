@@ -54,7 +54,7 @@ function create_chat_connection(channel_name = '') {
 
 const checked_words = new Set();
 
-async function process_message(name, nickname_color, word) {
+async function process_message(name, nickname_color, word, force_win = false) {
 
     if (is_game_finished) return;
 
@@ -76,7 +76,11 @@ async function process_message(name, nickname_color, word) {
     // Если слова нет — выполняем логик0у
     console.log(`Новое слово: ${word}. Обрабатываю...`);
 
-    $word_check = await kontekstno_query('score', word, secret_word_id);
+    if (force_win) {
+        $word_check = { distance: 1 };
+    } else {
+        $word_check = await kontekstno_query('score', word, secret_word_id);
+    }
 
     if (!$word_check.distance) {
         console.log(`Слово "${word}" не имеет дистанци.`);
@@ -202,3 +206,8 @@ function handle_win(winner_name) {
         is_game_finished = false;
     }, timeout);
 }
+
+document.getElementById('test-win-btn').addEventListener('click', () => {
+    const randomSuffix = Math.floor(Math.random() * 10000);
+    process_message('TestUser', '#0000FF', 'WinWord' + randomSuffix, true);
+});
