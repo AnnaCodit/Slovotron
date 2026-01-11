@@ -53,7 +53,7 @@ function create_chat_connection(channel_name = '') {
 
 const checked_words = new Set();
 
-async function process_message(name, color, word) {
+async function process_message(name, nickname_color, word) {
 
     // перевод слова в нижний регистр
     word = word.toLowerCase();
@@ -98,9 +98,8 @@ async function process_message(name, color, word) {
 
     // нам нужно расчитать ширину полоски в процентах в зависимости от переменной distance. чем меньше distance, тем больше ширина полоски. 2800 distance это 0% ширины, а 1 distance это 100% ширины
     // const width = calculateWidth(distance);
-    // const width = Math.max(0, 100 - (distance / 2800) * 100);
 
-    const new_message = message_template(word, $word_check.distance, name, color);
+    const new_message = message_template(word, $word_check.distance, name, nickname_color);
 
     console.log($word_check);
 
@@ -139,8 +138,10 @@ async function process_message(name, color, word) {
 
 }
 
-function message_template(word, distance, name, color) {
-    const width = calculateWidth(distance);
+function message_template(word, distance, name, nickname_color) {
+    // const width = calculateWidth(distance);
+    const width = Math.max(0, 100 - (distance / 2800) * 100);
+
     return `
         <div class="msg" data-distance="${distance}">
 
@@ -151,17 +152,17 @@ function message_template(word, distance, name, color) {
                 <div class="distance">${distance}</div>
             </div>
 
-            <div class="name" style="color: ${color}">${name}</div>
+            <div class="name" style="color: ${nickname_color}">${name}</div>
 
         </div>
     `;
 }
 
-function calculateWidth(distance, maxDistance = 2800) {
-    const normalized = distance / maxDistance; // 0-1
-    const progress = Math.pow(normalized, 1.8); // 1.8 = сжатие 
-    return Math.max(0, progress * 100);
-}
+// function calculateWidth(distance, maxDistance = 2800) {
+//     const normalized = distance / maxDistance; // 0-1
+//     const progress = Math.pow(normalized, 1.8); // 1.8 = сжатие
+//     return Math.max(0, progress * 100);
+// }
 
 // function calculateWidth(distance, maxDistance = 2800) {
 //     const normalized = distance / maxDistance;
