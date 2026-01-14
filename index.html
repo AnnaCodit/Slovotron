@@ -7,16 +7,24 @@
     <title>Document</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
     <div class="page-width">
         <header class="main">
-            <div class="logo">СЛОВОТРОН 9000</div>
+            <div class="logo">🧠 СЛОВОТРОН 9000</div>
             <nav>
                 <ul>
+                    <li class="leaderboard">
+                        <span id="menu-button-leaderboard" title="Лидерборд">🏆</span>
+                    </li>
                     <li class="settings">
-                        <span>⚙️</span>
+                        <span id="menu-button-settings" title="Настройки">⚙️</span>
                     </li>
                 </ul>
             </nav>
@@ -28,18 +36,25 @@
             <div class="setting"> Перезапуск игры после победы (секунды) <input type="text" id="restart-time"
                     placeholder="20">
             </div>
+            <div class="setting"> Поле для добавления слова <input type="checkbox" id="allow-add-word-checkbox"
+                    name="allow-add-word">
+            </div>
         </div>
         <div class="leaderboard" style="display: none;"> Лидерборд: </div>
         <div class="winner" style="display: none;"> Победитель: </div>
+        <div class="restart-timer" style="display: none;">
+            <span>Перезапуск через: </span>
+            <span id="restart-timer-value">0</span>
+        </div>
         <div class="guessing">
             <div class="last-words"></div>
             <div class="best-match"></div>
         </div>
-
         <div style="margin-top: 20px;">
             <button id="test-win-btn">Тест победы</button>
         </div>
     </div>
+    <script src="js/config.js"></script>
     <script src="js/ws.js"></script>
     <script src="js/init.js"></script>
 </body>

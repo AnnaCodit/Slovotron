@@ -6,10 +6,15 @@ body {
     background: #111;
     color: #FFF;
     font-size: 20px;
+    font-family: "Google Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "GRAD" 0;
 }
 
 .page-width {
-    max-width: 900px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
@@ -19,12 +24,21 @@ header {
     padding: 40px 0;
 }
 
-header .settings {
+nav {
     font-size: 40px;
+}
+
+nav ul {
+    display: flex;
+    gap: 20px;
 }
 
 .logo {
     font-size: 36px;
+}
+
+.winner {
+    font-size: 40px;
 }
 
 .guessing {
@@ -52,6 +66,11 @@ header .settings {
 
 .guessing .word-and-distance {}
 
+.guessing .msg {
+    /* background-color: oklch(40% 0.12 240); */
+    background-color: lab(16.1051% -1.18239 -11.7533);
+}
+
 .guessing .bg {
     position: absolute;
     top: 0;
@@ -65,4 +84,8 @@ header .settings {
     top: 0;
     left: 100%;
     height: 100%;
+}
+
+.guessing .last-words .name {
+    display: none;
 }

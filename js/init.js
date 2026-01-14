@@ -1,6 +1,5 @@
 
-let channel_name = 'fra3a';
-let restart_time = 20;
+
 let secret_word_id = '';
 
 async function generate_secret_word() {
@@ -33,6 +32,35 @@ async function kontekstno_query(method = '', word = '', challenge_id = '') {
     return await response.json();
 }
 
+function create_chat_connection(channel_name = '') {
+
+    const client = new tmi.Client({
+        channels: [channel_name]
+    });
+
+    // Подключаемся
+    client.connect();
+
+    // Слушаем сообщения
+    // tags — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
+    client.on('message', (channel, tags, message, self) => {
+
+        // console.log(channel, tags, message);
+
+        const color = tags['color'] || '#00FF00';
+        const name = tags['display-name'];
+
+        // если в сообщении больше двух слов то игнорируем
+        if (message.split(' ').length > 2) return;
+
+        // prevent xss attack from message
+        message = message.replace(/[^a-zA-Zа-яА-ЯёЁ0-9]/g, '');
+
+        process_message(name, color, message);
+
+    });
+
+}
 
 // basic app init
 async function app() {
