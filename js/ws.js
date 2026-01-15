@@ -125,6 +125,7 @@ function message_template(word, distance, name, nickname_color) {
 function handle_win(winner_name) {
     is_game_finished = true;
 
+    document.getElementById('winner-avatar').src = '';
     getTwitchUserData(winner_name).then((user) => {
         console.log(user);
         document.getElementById('winner-avatar').src = user.logo;
