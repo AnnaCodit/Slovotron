@@ -52,11 +52,14 @@ section {
     margin-bottom: 40px;
 }
 
+.content-box {}
+
 .logo span {
     position: absolute;
-    top: 0;
+    top: -5px;
     right: 0;
     font-size: 11px;
+    color: #777;
 }
 
 .logo {
@@ -69,11 +72,59 @@ section {
     padding: 20px;
     background-color: #222;
     border-radius: 10px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.winner {
-    font-size: 40px;
+#settings .setting {
+    margin-bottom: 15px;
+}
+
+#settings .setting .title {
+    margin-bottom: 5px;
+}
+
+#settings .setting input {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #777;
+    background: #333;
+    color: #FFF;
+}
+
+#winner {
+    padding: 20px;
+    background: #222;
+    border-radius: 20px;
+    font-size: 20px;
     text-align: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#winner .title {
+    margin-bottom: 20px;
+}
+
+#winner .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+#winner img {
+    max-width: 80px;
+    border-radius: 300px;
+    overflow: hidden;
+}
+
+#winner .winner-name {
+    font-size: 50px;
 }
 
 .guessing {

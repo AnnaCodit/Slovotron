@@ -124,8 +124,14 @@ function message_template(word, distance, name, nickname_color) {
 
 function handle_win(winner_name) {
     is_game_finished = true;
-    const winnerBlock = document.querySelector('.winner');
-    winnerBlock.innerText = `Победитель: ${winner_name}`;
+
+    getTwitchUserData(winner_name).then((user) => {
+        console.log(user);
+        document.getElementById('winner-avatar').src = user.logo;
+    });
+
+    const winnerBlock = document.getElementById('winner');
+    winnerBlock.querySelector('.winner-name').innerText = winner_name;
     winnerBlock.style.display = 'block';
 
     const timeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;

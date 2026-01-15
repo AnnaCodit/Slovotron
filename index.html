@@ -34,24 +34,34 @@
             </nav>
         </header>
         <section id="settings" class="content-box" style="display: none;">
-            <div class="setting"> Адрес Twitch-канала <input type="text" id="channel-name" name="channel_name"
-                    placeholder="fra3a">
+            <div class="setting">
+                <div class="title">Адрес Twitch-канала</div>
+                <input type="text" id="channel-name" name="channel_name" placeholder="fra3a">
             </div>
-            <div class="setting"> Перезапуск игры после победы (секунды) <input type="text" id="restart-time"
-                    name="restart_time" placeholder="20">
+            <div class="setting">
+                <div class="title">Перезапуск игры после победы (секунды)</div>
+                <input type="text" id="restart-time" name="restart_time" placeholder="20">
             </div>
-            <div class="setting"> Поле для добавления слова <input type="checkbox" id="allow-add-word-checkbox"
-                    name="allow-add-word">
+            <div class="setting">
+                <div class="title">Поле для добавления слова</div>
+                <input type="checkbox" id="allow-add-word-checkbox" name="allow-add-word">
             </div>
-    <div class="setting">
-        <button id="save-settings-btn">Сохранить</button>
-    </div>
+            <div class="setting">
+                <button id="save-settings-btn">Сохранить</button>
+            </div>
         </section>
-        <section id="info" style="">Привет 👋 Укажи в настройках адрес своего Twitch-канала и начни писать в чате слова.
-            Чем меньше цифра справа от слова - тем ближе вы к отгадке! Удачи <span id="test-win-btn">🎉</span>
+        <section id="info" class="content-box">Привет 👋 Укажи в настройках адрес своего Twitch-канала и начни писать в
+            чате слова. Чем меньше цифра справа от слова - тем ближе вы к отгадке! Удачи <span
+                id="test-win-btn">🎉</span>
         </section>
-        <section class="leaderboard" style="display: none;"> Лидерборд: </section>
-        <section class="winner" style="display: none;"> Победитель: </section>
+        <section id="leaderboard" style="display: none;"> Лидерборд: </section>
+        <section id="winner" style="display: none;">
+            <div class="title">Победитель: </div>
+            <div class="content">
+                <img src="https://placecats.com/300/300" alt="" id="winner-avatar">
+                <div class="winner-name"></div>
+            </div>
+        </section>
         <section class="restart-timer" style="display: none;">
             <span>Перезапуск через: </span>
             <span id="restart-timer-value">0</span>

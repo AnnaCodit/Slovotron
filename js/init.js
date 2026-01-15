@@ -110,6 +110,24 @@ if (saveBtn) {
     });
 }
 
+
+async function getTwitchUserData(username) {
+    try {
+        const response = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${username}`);
+        const data = await response.json();
+
+        if (data && data[0]) {
+            return data[0];
+        } else {
+            console.error("Пользователь не найден");
+            return null;
+        }
+    } catch (error) {
+        console.error("Ошибка запроса:", error);
+    }
+}
+
+
 // basic app init
 async function app() {
     try {
