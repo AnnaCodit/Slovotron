@@ -2,6 +2,7 @@
 
 let secret_word_id = '';
 let words_count = 0;
+let tmi_client = null;
 
 async function generate_secret_word() {
     const data = await kontekstno_query('random-challenge');
@@ -35,16 +36,20 @@ async function kontekstno_query(method = '', word = '', challenge_id = '') {
 
 function create_chat_connection(channel_name = '') {
 
-    const client = new tmi.Client({
+    if (tmi_client) {
+        tmi_client.disconnect().catch((err) => console.error('Error disconnecting:', err));
+    }
+
+    tmi_client = new tmi.Client({
         channels: [channel_name]
     });
 
     // Подключаемся
-    client.connect();
+    tmi_client.connect();
 
     // Слушаем сообщения
     // tags — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
-    client.on('message', (channel, tags, message, self) => {
+    tmi_client.on('message', (channel, tags, message, self) => {
 
         // console.log(channel, tags, message);
 
@@ -68,14 +73,55 @@ function create_chat_connection(channel_name = '') {
 
 }
 
+function loadSettings() {
+    const storedChannel = localStorage.getItem('channel_name');
+    const storedRestartTime = localStorage.getItem('restart_time');
+
+    if (storedChannel) {
+        channel_name = storedChannel;
+        const channelInput = document.getElementById('channel-name');
+        if (channelInput) channelInput.value = channel_name;
+    }
+
+    if (storedRestartTime) {
+        restart_time = parseInt(storedRestartTime, 10);
+        const restartInput = document.getElementById('restart-time');
+        if (restartInput) restartInput.value = restart_time;
+    }
+
+    return !!channel_name;
+}
+
+const saveBtn = document.getElementById('save-settings-btn');
+if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+        const channelInput = document.getElementById('channel-name');
+        const restartInput = document.getElementById('restart-time');
+
+        if (channelInput && channelInput.value) {
+            localStorage.setItem('channel_name', channelInput.value.trim());
+        }
+
+        if (restartInput && restartInput.value) {
+            localStorage.setItem('restart_time', restartInput.value.trim());
+        }
+
+        app();
+    });
+}
+
 // basic app init
 async function app() {
     try {
+        const ready = loadSettings();
 
-        if (channel_name) {
+        if (ready) {
+            document.getElementById('settings').style.display = 'none';
             secret_word_id = await generate_secret_word();
             console.log('ID секрутного слова: ', secret_word_id);
             create_chat_connection(channel_name);
+        } else {
+            document.getElementById('settings').style.display = 'block';
         }
 
         // initMenu();
