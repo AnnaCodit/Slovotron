@@ -1,26 +1,40 @@
 // Настройки клиента
 
 let is_game_finished = false;
-const DISTANCE_LEVELS = [
-    1,
-    150,
-    550,
-    1400,
-    2800
-];
 const checked_words = new Set();
 
-function getDistanceLevel(distance) {
-    for (let i = DISTANCE_LEVELS.length - 1; i >= 0; i--) {
-        if (distance >= DISTANCE_LEVELS[i]) {
-            return i + 1;
-        }
+const iwawwa = new Set(['ивавва', 'ивава', 'акане', 'аканэ', 'iwawwa', 'iwawa', 'akane']);
+const iwawwa_img = [
+    'iwawwa_2.avif',
+    'iwawwa_3.avif',
+    'iwawwa_4.avif',
+    'iwawwa_5.avif'
+];
+
+function getDistanceColor(distance) {
+    const colors = [
+        'linear-gradient(90deg,rgba(128, 0, 128, 0.5) 0%, rgba(128, 0, 128, 1) 100%);',
+        'linear-gradient(90deg,rgba(0, 128, 0, 0.5) 0%, rgba(0, 128, 0, 1) 100%);',
+        'linear-gradient(90deg,rgba(255, 255, 0, 0.5) 0%, rgba(255, 255, 0, 0.7) 100%);',
+        'linear-gradient(90deg,rgba(255, 160, 0, 0.5) 0%, rgba(255, 160, 0, 1) 100%);',
+        'linear-gradient(90deg,rgba(255, 0, 0, 0.5) 0%, rgba(255, 0, 0, 1) 100%);'
+    ];
+
+    if (distance === 1) {
+        return colors[0];
+    } else if (distance <= 150) {
+        return colors[1];
+    } else if (distance <= 550) {
+        return colors[2];
+    } else if (distance <= 1400) {
+        return colors[3];
+    } else {
+        return colors[4];
     }
-    return 0;
 }
 
 
-async function process_message(name, nickname_color, word, force_win = false) {
+async function process_message(user, nickname_color, word, force_win = false) {
 
     if (is_game_finished) return;
 
@@ -34,14 +48,31 @@ async function process_message(name, nickname_color, word, force_win = false) {
         console.log(`Слово "${word}" уже было проверено.`);
         // добавить слово в колонку .guessing .last-words в верх списка
         const last_words_container = document.querySelector('.guessing .last-words');
-
-        const founded_message = message_template(word, 0, name, nickname_color);
-
-
-        const html = `<div class="msg">${word} уже было использовано</div>`;
+        const html = `
+            <div class="msg">
+                <div class="bg"></div>
+                <div class="word-and-distance">
+                        <div class="word">${word} уже было использовано</div>
+                </div>
+            </div>`
+        last_words_container.insertAdjacentHTML('afterbegin', html);
+        return
+    } else if (iwawwa.has(word)) {
+        const last_words_container = document.querySelector('.guessing .last-words');
+        const pig = iwawwa_img[Math.floor(Math.random()*iwawwa_img.length)];
+        const html = `
+        <div class="msg">
+            <div class="bg"></div>
+            <div class="iwawwa">
+                    <div class="word"><img src="img/iwawwa_1.avif"></div>
+                    <div class="distance"><img src="img/${pig}"></div>
+            </div>
+        </div>`
         last_words_container.insertAdjacentHTML('afterbegin', html);
         return
     }
+
+    checked_words.add(word);
 
     // Если слова нет — выполняем логику
     console.log(`Новое слово: ${word}. Обрабатываю...`);
@@ -53,23 +84,29 @@ async function process_message(name, nickname_color, word, force_win = false) {
     }
 
     if (!word_check.distance) {
+        const last_words_container = document.querySelector('.guessing .last-words');
+        const html = `
+            <div class="msg">
+                <div class="bg"></div>
+                <div class="word-and-distance">
+                        <div class="word">Слово ${word} не найдено в словаре</div>
+                </div>
+            </div>`
+        last_words_container.insertAdjacentHTML('afterbegin', html);
         console.log(`Слово "${word}" не имеет дистанци.`);
         return
     }
 
     if (word_check.distance == 1) {
-        handle_win(name);
+        handle_win(user);
     }
 
     // добавить слово в колонку .guessing .best-match в верх списка
     const best_match_container = document.querySelector('.guessing .best-match');
 
-    const new_message = message_template(word, word_check.distance, name, nickname_color);
+    const new_message = message_template(word, word_check.distance, user['display-name'], nickname_color);
 
     console.log(word_check);
-
-    // И добавляем в список
-    checked_words.add(word);
 
     // добавить слово в колонку .guessing .last-words в верх списка
     const last_words_container = document.querySelector('.guessing .last-words');
@@ -106,39 +143,39 @@ async function process_message(name, nickname_color, word, force_win = false) {
 function message_template(word, distance, name, nickname_color) {
 
     const width = Math.max(0, 100 - (distance / 2800) * 100);
-    const distance_level = getDistanceLevel(distance);
+    const distance_color = getDistanceColor(distance);
 
     return `
-        <div class="msg distance-level-${distance_level}" data-distance="${distance}">
-            <div class="bg" style="width: ${width}%"></div>
+        <div class="msg" data-distance="${distance}">
+            <div class="bg" style="width: ${width}%; background: ${distance_color}"></div>
             <div class="word-and-distance">
                 <div class="word">${word}</div>
                 <div class="distance">${distance}</div>
             </div>
-            <div class="name" style="color: ${nickname_color}">
+            <div class="name" style="color: ${nickname_color}; white-space: nowrap;">
                 <span>${name}</span>
             </div>
         </div>
     `;
 }
 
-function handle_win(winner_name) {
+function handle_win(winner_user) {
     is_game_finished = true;
 
     if (typeof updateLeaderboard === 'function') {
-        updateLeaderboard(winner_name);
+        updateLeaderboard(winner_user['display-name']);
         const leaderboardSection = document.getElementById('leaderboard');
         if (leaderboardSection) leaderboardSection.style.display = 'flex';
     }
 
     document.getElementById('winner-avatar').src = '';
-    getTwitchUserData(winner_name).then((user) => {
+    getTwitchUserData(winner_user.username).then((user) => {
         console.log(user);
         document.getElementById('winner-avatar').src = user.logo;
     });
 
     const winnerBlock = document.getElementById('winner');
-    winnerBlock.querySelector('.winner-name').innerText = winner_name;
+    winnerBlock.querySelector('.winner-name').innerText = winner_user['display-name'];
     winnerBlock.style.display = 'block';
 
     const timeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
@@ -164,7 +201,7 @@ function handle_win(winner_name) {
 
 document.getElementById('test-win-btn').addEventListener('click', () => {
     const randomSuffix = Math.floor(Math.random() * 10000);
-    process_message('TestUser', '#FFFFFF', 'WinWord' + randomSuffix, true);
+    process_message({username: 'bronyatenei', 'display-name': '万尸口卄牙丅仨卄仨认'}, '#8A2BE2', 'WinWord' + randomSuffix, true);
 });
 
 document.getElementById('menu-button-settings').addEventListener('click', () => {
