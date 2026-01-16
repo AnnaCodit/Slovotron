@@ -6,27 +6,22 @@ on:
       - main
 
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Важно для определения измененных файлов
+          fetch-depth: 0
 
-      - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 📂 SFTP Deploy with Excludes
+        uses: cryogenix/sftp-deploy@v4.0.0
         with:
           server: ${{ secrets.SFTP_HOST }}
+          port: 2222
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp        # Важно указать протокол
-          local-dir: ./         # Откуда брать файлы (корень репо)
-          server-dir: /slovotron.fra3a.ru/         # Куда класть (обычно корень или public_html)
-          exclude: |            # Что НЕ грузить
-            **/.git*
-            **/.github*
-            **/node_modules/**
-            **/test/**
-            **/readme.md
+          local_path: './'  # Откуда берем
+          remote_path: '/'  # Куда кладем
+          # Самое важное: список того, что НЕ грузить (формат JSON)
+          ignore: '["**/.git/**", "**/.github/**", "**/node_modules/**", "**/.vscode/**", "**/.DS_Store", "**/readme.md", "**/test/**"]'
