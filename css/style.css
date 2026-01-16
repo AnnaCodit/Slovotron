@@ -228,13 +228,27 @@ section {
     padding: 13px 15px 10px;
 }
 
+.guessing .iwawwa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px 2px;
+}
+
+.guessing .iwawwa .distance {
+    animation: fadeInOpacity 2s;
+}
+
 .guessing .word {
+    z-index: 1;
     text-transform: uppercase;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .guessing .distance {
-    color: #DDD;
+    z-index: 1;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .guessing .bg {
@@ -282,4 +296,13 @@ input[type="button"]:hover,
 input[type="submit"]:hover {
     background-color: #444;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeInOpacity {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
 }
