@@ -1,4 +1,4 @@
-name: Deploy via SFTP
+name: Deploy via SCP
 
 on:
   push:
@@ -11,17 +11,15 @@ jobs:
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: 📂 SFTP Deploy with Excludes
-        uses: cryogenix/sftp-deploy@v4.0.0
+      - name: 🚀 Deploy to Server
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ secrets.SFTP_HOST }}
-          port: 2222
+          host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          local_path: './'  # Откуда берем
-          remote_path: '/'  # Куда кладем
-          # Самое важное: список того, что НЕ грузить (формат JSON)
-          ignore: '["**/.git/**", "**/.github/**", "**/node_modules/**", "**/.vscode/**", "**/.DS_Store", "**/readme.md", "**/test/**"]'
+          port: 2222
+          source: "."
+          target: "/"
+          # Что игнорировать (через запятую)
+          exclude: ".git,.github,.vscode,.DS_Store,node_modules,readme.md,test"
