@@ -48,27 +48,26 @@ function create_chat_connection(channel_name = '') {
     tmi_client.connect();
 
     // Слушаем сообщения
-    // tags — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
-    tmi_client.on('message', (channel, tags, message, self) => {
+    // user — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
+    tmi_client.on('message', (channel, user, message, self) => {
 
-        // console.log(channel, tags, message);
+        // console.log(channel, user, message);
 
-        const color = tags['color'] || '#00FF00';
-        const name = tags['display-name'];
+        const color = user['color'] || '#00FF00';
+        // const name = tags['display-name'];
 
         // если в сообщении больше двух слов то игнорируем
         if (message.split(' ').length > 2) return;
 
         // prevent xss attack from message
         message = message.replace(/[^a-zA-Zа-яА-ЯёЁ0-9]/g, '');
+        message = message.replace(/ё/g, 'е');
 
         words_count++;
         if (words_count === 1) {
             document.getElementById('info').style.display = 'none';
         }
-
-        process_message(name, color, message);
-
+        process_message(user, color, message);
     });
 
 }
