@@ -154,6 +154,7 @@ async function app() {
 
         if (ready) {
             document.getElementById('settings').style.display = 'none';
+            reset_round();
             secret_word_id = await generate_secret_word();
             console.log('ID секрутного слова: ', secret_word_id);
             create_chat_connection(channel_name);

@@ -59,7 +59,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
         return
     } else if (iwawwa.has(word)) {
         const last_words_container = document.querySelector('.guessing .last-words');
-        const pig = iwawwa_img[Math.floor(Math.random()*iwawwa_img.length)];
+        const pig = iwawwa_img[Math.floor(Math.random() * iwawwa_img.length)];
         const html = `
         <div class="msg">
             <div class="bg"></div>
@@ -187,9 +187,7 @@ function handle_win(winner_user) {
             console.error(e);
         }
 
-        document.querySelector('.guessing .last-words').innerHTML = '';
-        document.querySelector('.guessing .best-match').innerHTML = '';
-        checked_words.clear();
+        reset_round();
         winnerBlock.style.display = 'none';
 
         const leaderboardSection = document.getElementById('leaderboard');
@@ -199,9 +197,15 @@ function handle_win(winner_user) {
     }, timeout);
 }
 
+function reset_round() {
+    document.querySelector('.guessing .last-words').innerHTML = '';
+    document.querySelector('.guessing .best-match').innerHTML = '';
+    checked_words.clear();
+}
+
 document.getElementById('test-win-btn').addEventListener('click', () => {
     const randomSuffix = Math.floor(Math.random() * 10000);
-    process_message({username: 'bronyatenei', 'display-name': '万尸口卄牙丅仨卄仨认'}, '#8A2BE2', 'WinWord' + randomSuffix, true);
+    process_message({ username: 'bronyatenei', 'display-name': '万尸口卄牙丅仨卄仨认' }, '#8A2BE2', 'WinWord' + randomSuffix, true);
 });
 
 document.getElementById('menu-button-settings').addEventListener('click', () => {
