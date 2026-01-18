@@ -72,8 +72,6 @@ async function process_message(user, nickname_color, word, force_win = false) {
         return
     }
 
-    checked_words.add(word);
-
     // Если слова нет — выполняем логику
     console.log(`Новое слово: ${word}. Обрабатываю...`);
 
@@ -82,6 +80,8 @@ async function process_message(user, nickname_color, word, force_win = false) {
     } else {
         word_check = await kontekstno_query('score', word, secret_word_id);
     }
+
+    checked_words.add(word);
 
     if (!word_check.distance) {
         const last_words_container = document.querySelector('.guessing .last-words');
