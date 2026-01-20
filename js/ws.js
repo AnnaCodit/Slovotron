@@ -177,6 +177,8 @@ function handle_win(winner_user) {
     winnerBlock.style.display = 'block';
 
     const timeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
+    const end = Date.now() + (restart_time - 5) * 1000;
+    confetti_Stars(confetti_Win(end));
 
     setTimeout(async () => {
         try {
