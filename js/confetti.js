@@ -1,53 +1,86 @@
-const confetti_Stars = () => {
-    const defaults = {
+
+function randomInRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+const confetti_win = (endtime) => {
+  setInterval(function() {
+    const defaults = { count: 3, spread: 45 };
+    const timeLeft = endtime - Date.now();
+    if (timeLeft <= 0) {
+      return clearInterval(confetti_win);
+    }
+    confetti(
+      Object.assign({}, defaults, {
+        angle: 60,
+        position: { x: 20 },
+      })
+    );
+    confetti(
+      Object.assign({}, defaults, {
+        angle: 120,
+        position: { x: 80 },
+      })
+    );
+  }, 25);
+}
+
+const confetti_fireworks = (endtime) => {
+  const defaults = {
+    count: 50,
+    startVelocity: 30,
     spread: 360,
-    ticks: 100,
-    gravity: 0,
+    ticks: 60,
+    zIndex: 0,
+  };
+
+  setInterval(function() {
+    const timeLeft = endtime - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(confetti_fireworks);
+    }
+
+    confetti(
+      Object.assign({}, defaults, {
+        origin: { x: randomInRange(0, 0.3), y: Math.random() - 0.2 },
+      })
+    );
+    confetti(
+      Object.assign({}, defaults, {
+        origin: { x: randomInRange(0.7, 1), y: Math.random() - 0.2 },
+      })
+    );
+  }, 1000);
+}
+
+const confetti_stars = () => {
+  const defaults = {
+    spread: 360,
+    ticks: 80,
+    gravity: -0.2,
     decay: 0.94,
     startVelocity: 30,
     shapes: ["star"],
-    colors: ["FFE400", "FFBD00", "E89400", "FFCA6C", "FDFFB8"],
-    };
+    colors: ["#FFE400", "#FFBD00", "#E89400", "#FFCA6C", "#FDFFB8"],
+  };
 
-    function shoot() {
-    confetti({
-        ...defaults,
-        particleCount: 50,
+  function shoot() {
+    confetti(
+      Object.assign({}, defaults, {
+        count: 50,
         scalar: 1.2,
-        shapes: ["star"],
-    });
-
-    confetti({
-        ...defaults,
-        particleCount: 15,
+      })
+    );
+    confetti(
+      Object.assign({}, defaults, {
+        count: 15,
         scalar: 0.75,
-        shapes: ["circle"],
-    });
-    }
+      })
+    );
+  }
 
-    setTimeout(shoot, 0);
-    setTimeout(shoot, 100);
-    setTimeout(shoot, 200);
-}
-
-const confetti_Win = (time) => {
-    (function frame() {
-        confetti({
-          count: 3,
-          angle: 60,
-          spread: 55,
-          position: { x: 0 },
-        });
-      
-        confetti({
-          count: 3,
-          angle: 120,
-          spread: 55,
-          position: { x: 100 },
-        });
-      
-        if (Date.now() < time) {
-          requestAnimationFrame(frame);
-        }
-      })();
+  setTimeout(shoot, 0);
+  setTimeout(shoot, 100);
+  setTimeout(shoot, 200);
 }
