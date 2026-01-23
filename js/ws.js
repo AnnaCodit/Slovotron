@@ -1,5 +1,5 @@
-// Настройки клиента
-
+let channel_name = '';
+let restart_time = 20;
 let is_game_finished = false;
 const checked_words = new Set();
 const last_words_container = document.querySelector('.guessing .last-words');
@@ -178,7 +178,10 @@ function handle_win(winner_user) {
 
     const timeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
     const end = Date.now() + (restart_time - 5) * 1000;
-    confetti_Stars(confetti_Win(end));
+    confetti_stars(confetti_win(end));
+    if (window.innerWidth > 1200) {
+        confetti_fireworks(end);
+    }
 
     setTimeout(async () => {
         try {

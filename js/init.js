@@ -24,8 +24,6 @@ async function kontekstno_query(method = '', word = '', challenge_id = '') {
         url = "https://апи.контекстно.рф/score?challenge_id=" + challenge_id + "&word=" + word + "&challenge_type=random";
     }
 
-
-
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -59,8 +57,8 @@ function create_chat_connection(channel_name = '') {
 
         // если в сообщении больше двух слов, 20 символов
         // слишком короткое или число, то игнорируем
-        if (message.split(' ').length > 2  || message.length > 20 
-        || message.length === 1 || !isNaN(message)) return;
+        if (message.split(' ').length > 2 || message.length > 20
+            || message.length === 1 || !isNaN(message)) return;
 
         // prevent xss attack from message
         message = message.replace(/[^a-zA-Zа-яА-ЯёЁ0-9]/g, '');
@@ -69,6 +67,7 @@ function create_chat_connection(channel_name = '') {
         words_count++;
         if (words_count === 1) {
             document.getElementById('info').style.display = 'none';
+            document.getElementById('settings').style.display = 'none';
         }
         wordQueue.push({ 'user': user, 'color': color, 'msg': message })
         if (wordQueue.length === 1) {
@@ -79,11 +78,11 @@ function create_chat_connection(channel_name = '') {
 }
 
 async function runQueue() {
-        await process_message(wordQueue[0].user, wordQueue[0].color, wordQueue[0].msg)
-        wordQueue.shift()
-        if (wordQueue.length > 0) {
-            runQueue()
-        }
+    await process_message(wordQueue[0].user, wordQueue[0].color, wordQueue[0].msg)
+    wordQueue.shift()
+    if (wordQueue.length > 0) {
+        runQueue()
+    }
 
 }
 
@@ -124,7 +123,6 @@ if (saveBtn) {
     });
 }
 
-
 async function getTwitchUserData(username) {
     try {
         const response = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${username}`);
@@ -147,18 +145,24 @@ async function app() {
         const ready = loadSettings();
 
         if (ready) {
-            document.getElementById('settings').style.display = 'none';
+
             reset_round();
+
+            // получение секретного слова для отгадывания
             secret_word_id = await generate_secret_word();
-            console.log('ID секрутного слова: ', secret_word_id);
+            console.log('ID секретного слова: ', secret_word_id);
+
+            // подключение к чату твича и начало получения сообщений
             create_chat_connection(channel_name);
+
+            // отправка данных об использовании игры в аналитику
+            analytics_set_visit_params({ 'channel_name': channel_name });
+            analytics_reach_goal('game_start', { 'channel_name': channel_name });
+
         } else {
             document.getElementById('settings').style.display = 'block';
         }
 
-        // initMenu();
-        // const data = await getData();
-        // renderChallenge(data);
     } catch (error) {
         console.error(error);
     }
