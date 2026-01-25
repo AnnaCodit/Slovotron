@@ -20,7 +20,7 @@ jobs:
           server: ${{ secrets.SFTP_HOST }}        # адрес FTP-сервера
           username: ${{ secrets.SFTP_USER }}  # логин
           password: ${{ secrets.SFTP_PASSWORD }}  # пароль
-          port: 2222                               # порт (обычно 21); можно менять
+          port: 21                               # порт (обычно 21); можно менять
           protocol: ftps                          # "ftp" или "ftps"
           # local-dir: ./public                    # папка в репозитории, которую качать (поменяйте под вашу сборку)
           server-dir: /slovotron.fra3a.ru/               # путь на сервере (поменяйте под хостинг)
