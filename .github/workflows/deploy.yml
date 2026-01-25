@@ -24,7 +24,6 @@ jobs:
           protocol: ftps                          # "ftp" или "ftps"
           # local-dir: ./public                    # папка в репозитории, которую качать (поменяйте под вашу сборку)
           server-dir: /slovotron.fra3a.ru/               # путь на сервере (поменяйте под хостинг)
-          dry-run: true
           exclude: |
             **/.git*
             **/.git*/**
