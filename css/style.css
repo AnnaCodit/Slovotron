@@ -36,14 +36,25 @@ nav ul {
 }
 
 nav li {
-    padding: 15px 10px;
+    padding: 10px 10px;
     border-radius: 10px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+nav li span {
+    display: block;
+    transition: all 0.3s ease;
 }
 
 nav li:hover {
     background-color: #333;
 }
+
+nav li:hover span {
+    transform: rotate(10deg);
+}
+
 
 section {
     display: flex;
@@ -113,13 +124,12 @@ section {
 #leaderboard .title {
     text-align: center;
     font-size: 24px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: #ffd700;
 }
 
 #leaderboard .list {
     width: 100%;
-    margin-bottom: 20px;
 }
 
 .leaderboard-item {
@@ -132,6 +142,7 @@ section {
 
 .leaderboard-item:last-child {
     border-bottom: none;
+    padding-bottom: 0;
 }
 
 .leaderboard-item .rank {
@@ -158,6 +169,18 @@ section {
 #leaderboard .controls {
     text-align: center;
     width: 100%;
+    max-height: 0;
+    padding-top: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+#leaderboard:hover .controls {
+    padding-top: 20px;
+    max-height: 100px;
+    opacity: 1;
+    overflow: visible;
 }
 
 #leaderboard-statistic {
@@ -181,7 +204,7 @@ section {
 #statistic .title {
     text-align: center;
     font-size: 24px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: #8800ff;
 }
 
@@ -189,6 +212,7 @@ section {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    line-height: 1.7;
 }
 
 .reset-btn {
@@ -250,8 +274,19 @@ section {
 }
 
 .guessing .msg {
+    display: grid;
+    /* Начальное состояние анимации (схлопнут) */
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-bottom: 0;
+    /* Запускаем анимацию при появлении */
+    animation: openMsg 0.2s ease-out forwards;
+}
+
+.guessing .msg .msg-content {
+    overflow: hidden;
+    /* Скрываем то, что не влезает при анимации */
     border: 1px solid transparent;
-    margin-bottom: 10px;
     border-radius: 10px;
     position: relative;
     background-color: lab(16.1051% -1.18239 -11.7533);
@@ -341,5 +376,23 @@ input[type="submit"]:hover {
 
     100% {
         opacity: 1;
+    }
+}
+
+@keyframes openMsg {
+    0% {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: translateY(-20px);
+        margin-bottom: 0;
+    }
+
+    100% {
+        grid-template-rows: 1fr;
+        /* 1fr = 100% реальной высоты контента */
+        opacity: 1;
+        transform: translateY(0);
+        margin-bottom: 10px;
+        /* Финальный отступ между сообщениями */
     }
 }

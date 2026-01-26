@@ -57,9 +57,10 @@ async function process_message(user, nickname_color, word, force_win = false) {
         // добавить слово в колонку .guessing .last-words в верх списка
         const html = `
             <div class="msg">
-                <div class="bg"></div>
-                <div class="word-and-distance">
+                <div class="msg-content">
+                    <div class="word-and-distance">
                         <div class="word">${word} уже было использовано</div>
+                    </div>
                 </div>
             </div>`
         last_words_container.insertAdjacentHTML('afterbegin', html);
@@ -68,10 +69,11 @@ async function process_message(user, nickname_color, word, force_win = false) {
         const pig = iwawwa_img[Math.floor(Math.random() * iwawwa_img.length)];
         const html = `
         <div class="msg">
-            <div class="bg"></div>
-            <div class="iwawwa">
+            <div class="msg-content">
+                <div class="iwawwa">
                     <div class="word"><img src="img/iwawwa_1.avif"></div>
                     <div class="distance"><img src="img/${pig}"></div>
+                </div>
             </div>
         </div>`
         last_words_container.insertAdjacentHTML('afterbegin', html);
@@ -92,9 +94,10 @@ async function process_message(user, nickname_color, word, force_win = false) {
     if (!word_check.distance) {
         const html = `
             <div class="msg">
-                <div class="bg"></div>
-                <div class="word-and-distance">
+                <div class="msg-content">
+                    <div class="word-and-distance">
                         <div class="word">Слово ${word} не найдено в словаре</div>
+                    </div>
                 </div>
             </div>`
         last_words_container.insertAdjacentHTML('afterbegin', html);
@@ -153,13 +156,15 @@ function message_template(word, distance, name, nickname_color) {
 
     return `
         <div class="msg" data-distance="${distance}">
-            <div class="bg" style="width: ${width}%; background: ${distance_color}"></div>
-            <div class="word-and-distance">
-                <div class="word">${word}</div>
-                <div class="distance">${distance}</div>
-            </div>
-            <div class="name" style="color: ${nickname_color}; white-space: nowrap;">
-                <span>${name}</span>
+            <div class="msg-content">
+                <div class="bg" style="width: ${width}%; background: ${distance_color}"></div>
+                <div class="word-and-distance">
+                    <div class="word">${word}</div>
+                    <div class="distance">${distance}</div>
+                </div>
+                <div class="name" style="color: ${nickname_color}; white-space: nowrap;">
+                    <span>${name}</span>
+                </div>
             </div>
         </div>
     `;
@@ -220,7 +225,7 @@ function reset_round() {
 
 document.getElementById('test-win-btn').addEventListener('click', () => {
     const randomSuffix = Math.floor(Math.random() * 10000);
-    process_message({ username: 'bronyatenei', 'display-name': '万尸口卄牙丅仨卄仨认' }, '#8A2BE2', 'WinWord' + randomSuffix, true);
+    process_message({ username: 'TestUser', 'display-name': 'TestUser' }, '#8A2BE2', 'WinWord' + randomSuffix, true);
 });
 
 document.getElementById('menu-button-settings').addEventListener('click', () => {
