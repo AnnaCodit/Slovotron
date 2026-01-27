@@ -82,7 +82,12 @@ if (leaderboardBtn) {
         leaderboardSection.style.display = isVisible ? 'none' : 'flex';
 
         if (!isVisible) {
-            renderLeaderboard();
+            lbStatRender = setInterval(function() {
+                if (is_game_finished) {clearInterval(lbStatRender)}
+                renderLeaderboard();
+            }, 1000)
+        } else {
+            clearInterval(lbStatRender);
         }
     });
 }
