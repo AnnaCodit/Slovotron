@@ -14,6 +14,12 @@ body {
     line-height: 1.4;
 }
 
+a {}
+
+a:hover {
+    opacity: 0.9;
+}
+
 .page-width {
     max-width: 800px;
     margin: 0 auto;
@@ -343,6 +349,16 @@ section {
 
 .guessing .last-words .name {
     display: none;
+}
+
+footer.main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+footer.main .github-link img {
+    width: 100px;
 }
 
 .button,
