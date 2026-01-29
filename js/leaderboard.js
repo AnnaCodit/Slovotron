@@ -24,7 +24,6 @@ function updateLeaderboard(winnerName) {
 let cachedLeaderboardList = null;
 
 function renderLeaderboard() {
-    renderStatistic();
     const data = getLeaderboardData();
     if (!cachedLeaderboardList) {
         cachedLeaderboardList = document.querySelector('#leaderboard .list');
@@ -86,9 +85,11 @@ if (leaderboardBtn) {
         leaderboardSection.style.display = isVisible ? 'none' : 'flex';
 
         if (!isVisible) {
+            renderLeaderboard();
+            renderStatistic();
             lbStatRender = setInterval(function() {
                 if (is_game_finished) {clearInterval(lbStatRender)}
-                renderLeaderboard();
+                renderStatistic();
             }, 1000)
         } else {
             clearInterval(lbStatRender);
