@@ -5,6 +5,14 @@ let roundStartTime, uniqWords, repeatWords, winTime;
 let uniqUsers = new Set();
 const checked_words = new Map();
 const last_words_container = document.querySelector('.guessing .last-words');
+const MAX_LAST_WORDS = 20;
+
+function addLastWord(html) {
+    last_words_container.insertAdjacentHTML('afterbegin', html);
+    while (last_words_container.children.length > MAX_LAST_WORDS) {
+        last_words_container.removeChild(last_words_container.lastElementChild);
+    }
+}
 
 const iwawwa = new Set(['ивавва', 'ивава', 'акане', 'аканэ', 'iwawwa', 'iwawa', 'akane']);
 const iwawwa_img = [
@@ -62,7 +70,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
                     </div>
                 </div>
             </div>`
-        last_words_container.insertAdjacentHTML('afterbegin', html);
+        addLastWord(html);
         return
     } else if (iwawwa.has(word)) {
         const pig = iwawwa_img[Math.floor(Math.random() * iwawwa_img.length)];
@@ -75,7 +83,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
                 </div>
             </div>
         </div>`
-        last_words_container.insertAdjacentHTML('afterbegin', html);
+        addLastWord(html);
         return
     }
 
@@ -99,7 +107,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
                     </div>
                 </div>
             </div>`
-        last_words_container.insertAdjacentHTML('afterbegin', html);
+        addLastWord(html);
         console.log(`Слово "${word}" не имеет дистанци.`);
         return
     }
@@ -111,7 +119,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
     uniqWords++
 
     // добавить слово в колонку .guessing .last-words в верх списка
-    last_words_container.insertAdjacentHTML('afterbegin', new_message);
+    addLastWord(new_message);
 
     // добавить слово в колонку .guessing .best-match в верх списка
     const best_match_container = document.querySelector('.guessing .best-match');
