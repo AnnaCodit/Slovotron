@@ -126,6 +126,9 @@ if (saveBtn) {
             localStorage.setItem('restart_time', restartInput.value.trim());
         }
 
+        // скрываем блок настроек после сохранения для визуальной индикации успешного сохранения. возможно добавить тост всплавающий? возможно галочку рядом на секунду показывать?
+        document.getElementById('settings').style.display = 'none';
+
         app();
     });
 }
