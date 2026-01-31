@@ -93,10 +93,14 @@ async function process_message(user, nickname_color, word, force_win = false) {
     if (force_win) {
         word_check = { distance: 1 };
     } else {
-        word_check = await kontekstno_query('score', word, secret_word_id);
+        word_check = await kontekstno_query({
+            method: 'score',
+            word: word,
+            challenge_id: secret_word_id
+        });
     }
 
-    checked_words.set(word, {distance: word_check.distance});
+    checked_words.set(word, { distance: word_check.distance });
 
     if (!word_check.distance) {
         const html = `

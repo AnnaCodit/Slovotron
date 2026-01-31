@@ -6,24 +6,38 @@ let tmi_client = null;
 let wordQueue = [];
 
 async function generate_secret_word() {
-    const data = await kontekstno_query('random-challenge');
+    const data = await kontekstno_query({ method: 'random-challenge' });
     room_id = data.id;
     return room_id;
 }
 
-async function kontekstno_query(method = '', word = '', challenge_id = '') {
+async function kontekstno_query({
+    method = '',
+    word = '',
+    challenge_id = '',
+    last_word_rank = 0
+} = {}) {
 
-    let url = '';
-    // console.log(method);
+    const BASE_DOMAIN = 'https://xn--80aqu.xn--e1ajbkccewgd.xn--p1ai/';
 
-    if (method == 'random-challenge') {
-        url = "https://xn--80aqu.xn--e1ajbkccewgd.xn--p1ai/" + method;
+    // 1. Создаем объект URL. Он сам склеит домен и метод правильно.
+    // Если method пустой, просто будет запрос на корень, можно добавить проверку при желании.
+    const url = new URL(method, BASE_DOMAIN);
+
+    // 2. Добавляем параметры в зависимости от метода
+    if (method === 'score') {
+        url.searchParams.append('challenge_id', challenge_id);
+        url.searchParams.append('word', word);
+        url.searchParams.append('challenge_type', 'random');
     }
-
-    if (method == 'score') {
-        url = "https://апи.контекстно.рф/score?challenge_id=" + challenge_id + "&word=" + word + "&challenge_type=random";
+    else if (method === 'tip') {
+        url.searchParams.append('challenge_id', challenge_id);
+        url.searchParams.append('last_word_rank', last_word_rank);
+        url.searchParams.append('challenge_type', 'random');
     }
+    // Для 'random-challenge' параметры не нужны, url остается чистым
 
+    // 3. Делаем запрос
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -59,9 +73,13 @@ function create_chat_connection(channel_name = '') {
         if (message.split(' ').length > 1 || message.length > 20 || message.length <= 1 || !isNaN(message)) return;
 
         // prevent xss attack from message
-        message = message.replace(/[^a-zA-Zа-яА-ЯёЁ0-9]/g, '');
+        message = message.replace(/[^a-zA-Zа-яА-ЯёЁ0-9!]/g, '');
         // защита от пустых строк
         if (message.length < 2) return;
+
+        // проверка на подсказку
+        if (check_for_tip(message)) return;
+
         message = message.replace(/ё/g, 'е');
 
         words_count++;
