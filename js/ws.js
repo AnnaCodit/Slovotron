@@ -1,7 +1,7 @@
 let channel_name = '';
 let restart_time = 20;
 let is_game_finished = false;
-let roundStartTime, uniqWords, repeatWords, winTime;
+let menuTimerId, resetRoundTimeoutId, resetTimerPaused, roundStartTime, uniqWords, repeatWords, winTime;
 let uniqUsers = new Set();
 const checked_words = new Map();
 const last_words_container = document.querySelector('.guessing .last-words');
@@ -202,14 +202,40 @@ function handle_win(winner_user) {
     winnerBlock.querySelector('.winner-name').innerText = winner_user['display-name'];
     winnerBlock.style.display = 'block';
 
-    const timeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
-    const end = Date.now() + (restart_time - 5) * 1000;
-    confetti_stars(confetti_win(end));
+    const resetTimeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
+    let confettiTimeout = Date.now() + (restart_time - 5) * 1000;
+    if (restart_time <= 10) {confettiTimeout = Date.now() + 5 * 1000};
+    confetti_stars(confetti_win(confettiTimeout));
     if (window.innerWidth > 1200) {
-        confetti_fireworks(end);
+        confetti_fireworks(confettiTimeout);
+    }
+    
+    if (restart_time > 0) {
+        const menuTimer = document.getElementById('menu-timer');
+        menuTimer.innerHTML=pad(restart_time);
+        menuTimer.style.display = 'block'
+    
+        resetRoundTimeout(resetTimeout);
+    
+        const restartTime = Date.now() + (restart_time * 1000);
+    
+        menuTimerId = setInterval(async () => {
+            let sec = Math.floor((restartTime - Date.now()) / 1000);
+            if (Date.now() > restartTime) {
+                clearInterval(menuTimerId);
+                menuTimer.style.display = 'none';
+            } else {
+                menuTimer.innerHTML=pad(sec);
+            }
+        }, 333)
+    } else {
+        document.getElementById('menu-button-restart').style.display = 'block';
     }
 
-    setTimeout(async () => {
+}
+
+async function resetRoundTimeout(time) {
+    resetRoundTimeoutId = setTimeout(async () => {
         try {
             secret_word_id = await generate_secret_word();
         } catch (e) {
@@ -217,13 +243,13 @@ function handle_win(winner_user) {
         }
 
         reset_round();
-        winnerBlock.style.display = 'none';
+        document.getElementById('winner').style.display = 'none';
 
         const leaderboardSection = document.getElementById('leaderboard-statistic');
         if (leaderboardSection) leaderboardSection.style.display = 'none';
 
         is_game_finished = false;
-    }, timeout);
+    }, time);
 }
 
 function reset_round() {
@@ -247,4 +273,24 @@ document.getElementById('menu-button-settings').addEventListener('click', () => 
 document.getElementById('menu-button-info').addEventListener('click', () => {
     const infoSection = document.getElementById('info');
     infoSection.style.display = infoSection.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('menu-button-restart').addEventListener('click', () => {
+    resetRoundTimeout(0);
+    document.getElementById('menu-button-restart').style.display = 'none';
+});
+
+document.getElementById('menu-timer').addEventListener('click', () => {
+    const menuTimer = document.getElementById('menu-timer');
+    if (is_game_finished && !resetTimerPaused) {
+        menuTimer.style.color = '#777';
+        clearTimeout(resetRoundTimeoutId);
+        clearInterval(menuTimerId);
+        resetTimerPaused = true;
+    } else if (is_game_finished && resetTimerPaused) {
+        menuTimer.style.display = 'none';
+        menuTimer.style.color = '#FFF';
+        resetRoundTimeout(0);
+        resetTimerPaused = false;
+    }
 });

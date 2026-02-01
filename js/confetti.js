@@ -7,7 +7,7 @@ const confetti_win = (endtime) => {
   const interval = setInterval(function() {
     const defaults = { count: 3, spread: 45 };
     const timeLeft = endtime - Date.now();
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 || resetTimerPaused) {
       return clearInterval(interval);
     }
     confetti(
@@ -37,7 +37,7 @@ const confetti_fireworks = (endtime) => {
   const interval = setInterval(function() {
     const timeLeft = endtime - Date.now();
 
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 || resetTimerPaused) {
       return clearInterval(interval);
     }
 

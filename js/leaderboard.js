@@ -11,11 +11,11 @@ function saveLeaderboardData(data) {
 }
 
 function updateLeaderboard(winnerName) {
-    const data = getLeaderboardData();
+    let data = getLeaderboardData();
     if (data[winnerName]) {
-        data[winnerName]++;
+        data = Object.assign({[winnerName]: data[winnerName]++}, data);
     } else {
-        data[winnerName] = 1;
+        data = Object.assign({[winnerName]: 1}, data);
     }
     saveLeaderboardData(data);
     renderLeaderboard();

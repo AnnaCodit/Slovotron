@@ -230,6 +230,15 @@ section {
     line-height: 1.7;
 }
 
+#menu-timer {
+    display: none;
+    font-family: monospace;
+}
+
+#menu-button-restart {
+    display: none;
+}
+
 .reset-btn {
     background-color: #333;
     font-size: 14px;
