@@ -7,11 +7,22 @@ const checked_words = new Map();
 const last_words_container = document.querySelector('.guessing .last-words');
 const MAX_LAST_WORDS = 20;
 
-function addLastWord(html) {
+function addAnythingToLastWords(html) {
     last_words_container.insertAdjacentHTML('afterbegin', html);
     while (last_words_container.children.length > MAX_LAST_WORDS) {
         last_words_container.removeChild(last_words_container.lastElementChild);
     }
+}
+function addTextToLastWords(text = '') {
+    const html = `
+        <div class="msg">
+            <div class="msg-content">
+                <div class="word-and-distance">
+                    <div class="word">${text}</div>
+                </div>
+            </div>
+        </div>`
+    addAnythingToLastWords(html);
 }
 
 const iwawwa = new Set(['ивавва', 'ивава', 'акане', 'аканэ', 'iwawwa', 'iwawa', 'akane']);
@@ -60,17 +71,9 @@ async function process_message(user, nickname_color, word, force_win = false) {
             if (!uniqUsers.has(user.username)) { uniqUsers.add(user.username) }
             repeatWords++
         }
-        console.log(`Слово "${word}" уже было проверено.`);
         // добавить слово в колонку .guessing .last-words в верх списка
-        const html = `
-            <div class="msg">
-                <div class="msg-content">
-                    <div class="word-and-distance">
-                        <div class="word">${word} уже было использовано</div>
-                    </div>
-                </div>
-            </div>`
-        addLastWord(html);
+        addTextToLastWords(word + ' уже было использовано');
+        // console.log(`Слово "${word}" уже было проверено.`);
         return
     } else if (iwawwa.has(word)) {
         const pig = iwawwa_img[Math.floor(Math.random() * iwawwa_img.length)];
@@ -83,7 +86,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
                 </div>
             </div>
         </div>`
-        addLastWord(html);
+        addAnythingToLastWords(html);
         return
     }
 
@@ -99,32 +102,41 @@ async function process_message(user, nickname_color, word, force_win = false) {
             challenge_id: secret_word_id
         });
     }
+    // console.log(word_check);
 
     checked_words.set(word, { distance: word_check.distance });
 
     if (!word_check.distance) {
-        const html = `
-            <div class="msg">
-                <div class="msg-content">
-                    <div class="word-and-distance">
-                        <div class="word">${word} не найдено в словаре</div>
-                    </div>
-                </div>
-            </div>`
-        addLastWord(html);
-        console.log(`Слово "${word}" не имеет дистанци.`);
+        addTextToLastWords(word + ' не найдено в словаре');
+        // console.log(`Слово "${word}" не имеет дистанци.`);
         return
     }
 
-    const new_message = message_template(word, word_check.distance, user['display-name'], nickname_color);
+    if (word_check.distance < best_found_distance) {
+        console.log('Щас мы запишем новую дистанцию из обычного процессинга слова:', word_check.distance);
+        best_found_distance = word_check.distance;
+    }
 
-    console.log(word_check);
     if (!uniqUsers.has(user.username)) { uniqUsers.add(user.username) }
     uniqWords++
 
-    // добавить слово в колонку .guessing .last-words в верх списка
-    addLastWord(new_message);
+    // готовый html шаблон слова
+    const new_message = message_template(word, word_check.distance, user['display-name'], nickname_color);
 
+    // добавить слово в колонку .guessing .last-words в верх списка
+    addAnythingToLastWords(new_message);
+
+    // добавить слово в колонку .guessing .best-match в нужное место в зависимости от дистанции
+    addMatchWord(new_message, word_check.distance);
+
+    // обработка победы (слово угадано)
+    if (word_check.distance == 1) {
+        handle_win(user);
+    }
+
+}
+
+function addMatchWord(new_message, distance) {
     // добавить слово в колонку .guessing .best-match в верх списка
     const best_match_container = document.querySelector('.guessing .best-match');
 
@@ -137,7 +149,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
     const container = best_match_container;
     const children = Array.from(container.children);
     let insertIndex = children.length;
-    const newDistance = parseFloat(word_check.distance);
+    const newDistance = parseFloat(distance);
 
     for (let i = 0; i < children.length; i++) {
         const childDistance = parseFloat(children[i].dataset.distance);
@@ -153,12 +165,6 @@ async function process_message(user, nickname_color, word, force_win = false) {
     } else {
         container.insertBefore(newMsgElement, children[insertIndex]);
     }
-
-    // обработка победы (слово угадано)
-    if (word_check.distance == 1) {
-        handle_win(user);
-    }
-
 }
 
 function message_template(word, distance, name, nickname_color) {
@@ -204,28 +210,28 @@ function handle_win(winner_user) {
 
     const resetTimeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
     let confettiTimeout = Date.now() + (restart_time - 5) * 1000;
-    if (restart_time <= 10) {confettiTimeout = Date.now() + 5 * 1000};
+    if (restart_time <= 10) { confettiTimeout = Date.now() + 5 * 1000 };
     confetti_stars(confetti_win(confettiTimeout));
     if (window.innerWidth > 1200) {
         confetti_fireworks(confettiTimeout);
     }
-    
+
     if (restart_time > 0) {
         const menuTimer = document.getElementById('menu-timer');
-        menuTimer.innerHTML=pad(restart_time);
+        menuTimer.innerHTML = pad(restart_time);
         menuTimer.style.display = 'block'
-    
+
         resetRoundTimeout(resetTimeout);
-    
+
         const restartTime = Date.now() + (restart_time * 1000);
-    
+
         menuTimerId = setInterval(async () => {
             let sec = Math.floor((restartTime - Date.now()) / 1000);
             if (Date.now() > restartTime) {
                 clearInterval(menuTimerId);
                 menuTimer.style.display = 'none';
             } else {
-                menuTimer.innerHTML=pad(sec);
+                menuTimer.innerHTML = pad(sec);
             }
         }, 333)
     } else {
@@ -259,6 +265,8 @@ function reset_round() {
     roundStartTime = Date.now();
     uniqUsers.clear();
     uniqWords = repeatWords = 0;
+    reset_tips();
+    best_found_distance = 99999;
 }
 
 document.getElementById('test-win-btn').addEventListener('click', () => {
