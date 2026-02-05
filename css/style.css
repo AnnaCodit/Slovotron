@@ -315,7 +315,7 @@ section {
 .decor-party {
     top: -35px;
     right: -35px;
-    animation: sway 2.5s ease-in-out infinite;
+    animation: sway 2.5s ease-in-out infinite alternate;
 }
 
 @keyframes float-crown {
