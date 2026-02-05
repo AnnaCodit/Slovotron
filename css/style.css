@@ -55,6 +55,7 @@ nav li {
 nav li span {
     display: block;
     transition: all 0.3s ease;
+    user-select: none;
 }
 
 nav li:hover {
