@@ -48,18 +48,21 @@
         <section id="settings" class="content-box" style="display: none;">
             <div class="setting">
                 <div class="title">Имя канала на Twitch</div>
-                <input type="text" id="channel-name" name="channel_name" placeholder="fra3a">
+                <div class="avatar-container">
+                    <input type="text" id="channel-name" name="channel_name" placeholder="fra3a" required>
+                    <img id="setting-avatar" class="avatar" src="">
+                </div>
             </div>
             <div class="setting">
                 <div class="title">Перезапуск игры после победы (секунды)</div>
-                <input type="text" id="restart-time" name="restart_time" placeholder="20">
+                <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
             </div>
             <!-- <div class="setting">
                 <div class="title">Поле для добавления слова</div>
                 <input type="checkbox" id="allow-add-word-checkbox" name="allow-add-word">
             </div> -->
             <div class="setting">
-                <button id="save-settings-btn">Сохранить</button>
+                <button id="save-settings-btn" disabled>Сохранить</button>
             </div>
         </section>
         <section id="leaderboard-statistic" style="display: none;">
