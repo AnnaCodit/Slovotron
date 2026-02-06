@@ -292,9 +292,11 @@ document.getElementById('menu-button-restart').addEventListener('click', () => {
 document.getElementById('menu-timer').addEventListener('click', () => {
     const menuTimer = document.getElementById('menu-timer');
     const menuRestartButton = document.getElementById('menu-button-restart');
-    menuTimer.style.display = 'none';
-    menuRestartButton.style.display = 'block';
-    clearTimeout(resetRoundTimeoutId);
-    clearInterval(menuTimerId);
-    resetTimerPaused = true;
+    if (is_game_finished) {
+        menuTimer.style.display = 'none';
+        menuRestartButton.style.display = 'block';
+        clearTimeout(resetRoundTimeoutId);
+        clearInterval(menuTimerId);
+        resetTimerPaused = true;
+    }
 });
