@@ -225,7 +225,6 @@ async function validateTwitchAcc(acc) {
 
 channelInput.addEventListener("input", () => {
     document.getElementById('setting-avatar').style.display = 'none';
-    channelInput.setCustomValidity("Поле в процессе редактирования"); // Делаем форму невалидной на время ввода
     checkFormsValidity();
 
     clearTimeout(validationTimeout);
