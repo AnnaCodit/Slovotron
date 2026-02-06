@@ -4,7 +4,6 @@ let secret_word_id = '';
 let words_count = 0;
 let tmi_client = null;
 let wordQueue = [];
-let lastInputTime, twitchAccValidation;
 
 async function generate_secret_word() {
     const data = await kontekstno_query({ method: 'random-challenge' });
@@ -195,16 +194,41 @@ async function app() {
 
 const channelInput = document.getElementById("channel-name");
 const restartInput = document.getElementById("restart-time");
+let validationTimeout;
 
-channelInput.addEventListener("input", (event) => {
-    document.getElementById('setting-avatar').style.display = 'none'
-    channelInput.setCustomValidity("Логин либо ссылка на канал");
+function checkFormsValidity() {
+    saveBtn.disabled = !channelInput.validity.valid || !restartInput.validity.valid;
+}
+
+async function validateTwitchAcc(acc) {
+    channelInput.setCustomValidity("Проверяю...");
     channelInput.reportValidity();
-    saveBtn.disabled = true;
-    lastInputTime = Date.now();
-    if (typeof twitchAccValidation !== 'undefined') {
-        clearInterval(twitchAccValidation);
+    try {
+        const user = await getTwitchUserData(acc);
+        if (user) {
+            document.getElementById('setting-avatar').src = user.logo;
+            document.getElementById('setting-avatar').style.display = 'flex';
+            channelInput.setCustomValidity("");
+        } else {
+            document.getElementById('setting-avatar').style.display = 'none';
+            channelInput.setCustomValidity("Канал не найден, попробуйте еще раз");
+        }
+        channelInput.reportValidity();
+    } catch (error) {
+        console.error("Ошибка при проверке канала:", error);
+        document.getElementById('setting-avatar').style.display = 'none';
+        channelInput.setCustomValidity("Ошибка при проверке. Попробуйте позже.");
+        channelInput.reportValidity();
     }
+    checkFormsValidity();
+}
+
+channelInput.addEventListener("input", () => {
+    document.getElementById('setting-avatar').style.display = 'none';
+    channelInput.setCustomValidity("Поле в процессе редактирования"); // Делаем форму невалидной на время ввода
+    checkFormsValidity();
+
+    clearTimeout(validationTimeout);
 
     let channelName = channelInput.value.trim();
     if (channelName.includes('twitch.tv/')) {
@@ -212,42 +236,20 @@ channelInput.addEventListener("input", (event) => {
         if (parts.length > 1) {
             channelName = parts[1].split('/')[0].split('?')[0];
             channelInput.value = channelName;
-            validateTwitchAcc(channelName)
         }
-    } else if (channelInput.value.length >= 4) {
-        validateTwitchAcc(channelInput.value)
+    }
+
+    if (channelName.length >= 4) {
+        validationTimeout = setTimeout(() => validateTwitchAcc(channelName), 1000);
+    } else {
+        channelInput.setCustomValidity("Имя канала должно быть не менее 4 символов.");
+        checkFormsValidity();
     }
 });
 
-restartInput.addEventListener("input", (event) => {
+restartInput.addEventListener("input", () => {
     restartInput.reportValidity();
-    if (!restartInput.validity.valid) {
-        saveBtn.disabled = true;
-    } else if (channelInput.validity.valid) {
-        saveBtn.disabled = false;
-    }
+    checkFormsValidity();
 });
-
-function validateTwitchAcc(acc) {
-    twitchAccValidation = setInterval(function() {
-        if ((Date.now() - lastInputTime) > 1000) {
-            clearInterval(twitchAccValidation);
-            channelInput.setCustomValidity("Проверяю...");
-            getTwitchUserData(acc).then((user) => {
-                if (user) {
-                    document.getElementById('setting-avatar').src = user.logo
-                    document.getElementById('setting-avatar').style.display = 'flex'
-                    channelInput.setCustomValidity("");
-                    if (restartInput.validity.valid) {
-                        saveBtn.disabled = false;
-                    }
-                } else {
-                    channelInput.setCustomValidity("Канал не найден, попробуйте еще раз");
-                }
-                channelInput.reportValidity();
-            });
-        }
-    }, 500);
-}
 
 app();
