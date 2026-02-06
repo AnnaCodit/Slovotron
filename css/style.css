@@ -122,12 +122,37 @@ section {
     font-size: 18px;
 }
 
+#settings .setting input:focus {
+    outline: 2px solid #777;
+}
+
+#settings .setting input:invalid {
+    outline: 2px solid rgba(255, 0, 0, 0.5);
+}
+
 #settings .setting:last-child {
     margin-bottom: 0;
 }
 
 #settings button {
     margin-top: 2px;
+}
+
+#settings .avatar-container {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+#settings .avatar {
+    position: absolute;
+    display: none;
+    right: 5px;
+    top: 6px;
+    border-radius: 300px;
+    width: 30px;
+    height: 30px;
+    outline: 2px solid green;
 }
 
 #leaderboard {
@@ -417,6 +442,13 @@ input[type="button"]:active,
 input[type="submit"]:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.button:disabled,
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled {
+    background-color: #777;
 }
 
 @keyframes fadeInOpacity {
