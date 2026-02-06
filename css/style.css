@@ -448,7 +448,7 @@ input[type="submit"]:active {
 button:disabled,
 input[type="button"]:disabled,
 input[type="submit"]:disabled {
-    background-color: #777;
+    background-color: #555;
 }
 
 @keyframes fadeInOpacity {
