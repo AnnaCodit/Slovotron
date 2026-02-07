@@ -7,8 +7,13 @@
     <title>Словотрон 9000</title>
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Система отслеживания ошибок фронтэнда Sentry. В будущем можно попробовать еще LogRocket -->
+    <script src="https://js.sentry-cdn.com/d96be4f9b0094010cb3a23e45d5e4bf6.min.js" crossorigin="anonymous"></script>
+    <!-- Взаимодействие с твичом -->
     <script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
+    <!-- Эффекты конфети -->
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.9.1/tsparticles.confetti.bundle.min.js"></script>
+    <!-- Google fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -23,9 +28,7 @@
             </div>
             <nav>
                 <ul>
-                    <li id="menu-timer">
-                        00
-                    </li>
+                    <li id="menu-timer"> 00 </li>
                     <li id="menu-button-restart" class="restart">
                         <span title="Рестарт">🔄</span>
                     </li>
