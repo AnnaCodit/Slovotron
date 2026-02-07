@@ -133,15 +133,7 @@ if (saveBtn) {
         const restartInput = document.getElementById('restart-time');
 
         if (channelInput && channelInput.value) {
-            let channelName = channelInput.value.trim();
-            if (channelName.includes('twitch.tv/')) {
-                const parts = channelName.split('twitch.tv/');
-                if (parts.length > 1) {
-                    channelName = parts[1].split('/')[0].split('?')[0];
-                    channelInput.value = channelName;
-                }
-            }
-            localStorage.setItem('channel_name', channelName);
+            localStorage.setItem('channel_name', channelInput.value.trim());
         }
 
         if (restartInput && restartInput.value) {
@@ -199,5 +191,64 @@ async function app() {
         console.error(error);
     }
 }
+
+const channelInput = document.getElementById("channel-name");
+const restartInput = document.getElementById("restart-time");
+let validationTimeout;
+
+function checkFormsValidity() {
+    saveBtn.disabled = !channelInput.validity.valid || !restartInput.validity.valid;
+}
+
+async function validateTwitchAcc(acc) {
+    channelInput.setCustomValidity("Проверяю...");
+    channelInput.reportValidity();
+    try {
+        const user = await getTwitchUserData(acc);
+        if (user) {
+            document.getElementById('setting-avatar').src = user.logo;
+            document.getElementById('setting-avatar').style.display = 'flex';
+            channelInput.setCustomValidity("");
+        } else {
+            document.getElementById('setting-avatar').style.display = 'none';
+            channelInput.setCustomValidity("Канал не найден, попробуйте еще раз");
+        }
+        channelInput.reportValidity();
+    } catch (error) {
+        console.error("Ошибка при проверке канала:", error);
+        document.getElementById('setting-avatar').style.display = 'none';
+        channelInput.setCustomValidity("Ошибка при проверке. Попробуйте позже.");
+        channelInput.reportValidity();
+    }
+    checkFormsValidity();
+}
+
+channelInput.addEventListener("input", () => {
+    document.getElementById('setting-avatar').style.display = 'none';
+    checkFormsValidity();
+
+    clearTimeout(validationTimeout);
+
+    let channelName = channelInput.value.trim();
+    if (channelName.includes('twitch.tv/')) {
+        const parts = channelName.split('twitch.tv/');
+        if (parts.length > 1) {
+            channelName = parts[1].split('/')[0].split('?')[0];
+            channelInput.value = channelName;
+        }
+    }
+
+    if (channelName.length >= 3) {
+        validationTimeout = setTimeout(() => validateTwitchAcc(channelName), 1000);
+    } else {
+        channelInput.setCustomValidity("Имя канала должно быть не менее 3 символов.");
+        checkFormsValidity();
+    }
+});
+
+restartInput.addEventListener("input", () => {
+    restartInput.reportValidity();
+    checkFormsValidity();
+});
 
 app();

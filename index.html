@@ -6,9 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Словотрон 9000</title>
     <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v={{ site.time | date: '%s' }}">
+    <!-- Система отслеживания ошибок фронтэнда Sentry. В будущем можно попробовать еще LogRocket -->
+    <script src="https://js.sentry-cdn.com/d96be4f9b0094010cb3a23e45d5e4bf6.min.js" crossorigin="anonymous"></script>
+    <!-- Взаимодействие с твичом -->
     <script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
+    <!-- Эффекты конфети -->
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.9.1/tsparticles.confetti.bundle.min.js"></script>
+    <!-- Google fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -23,9 +28,7 @@
             </div>
             <nav>
                 <ul>
-                    <li id="menu-timer">
-                        00
-                    </li>
+                    <li id="menu-timer"> 00 </li>
                     <li id="menu-button-restart" class="restart">
                         <span title="Рестарт">🔄</span>
                     </li>
@@ -48,18 +51,21 @@
         <section id="settings" class="content-box" style="display: none;">
             <div class="setting">
                 <div class="title">Имя канала на Twitch</div>
-                <input type="text" id="channel-name" name="channel_name" placeholder="fra3a">
+                <div class="avatar-container">
+                    <input type="text" id="channel-name" name="channel_name" placeholder="fra3a" required>
+                    <img id="setting-avatar" class="avatar">
+                </div>
             </div>
             <div class="setting">
                 <div class="title">Перезапуск игры после победы (секунды)</div>
-                <input type="text" id="restart-time" name="restart_time" placeholder="20">
+                <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
             </div>
             <!-- <div class="setting">
                 <div class="title">Поле для добавления слова</div>
                 <input type="checkbox" id="allow-add-word-checkbox" name="allow-add-word">
             </div> -->
             <div class="setting">
-                <button id="save-settings-btn">Сохранить</button>
+                <button id="save-settings-btn" disabled>Сохранить</button>
             </div>
         </section>
         <section id="leaderboard-statistic" style="display: none;">
@@ -112,12 +118,12 @@
         </a>
     </footer>
     <!-- Все основные скрипты -->
-    <script src="js/ws.js"></script>
-    <script src="js/leaderboard.js"></script>
-    <script src="js/tips.js"></script>
-    <script src="js/init.js"></script>
-    <script src="js/confetti.js"></script>
-    <script src="js/analytics.js"></script>
+    <script src="js/ws.js?v={{ site.time | date: '%s' }}"></script>
+    <script src="js/leaderboard.js?v={{ site.time | date: '%s' }}"></script>
+    <script src="js/tips.js?v={{ site.time | date: '%s' }}"></script>
+    <script src="js/init.js?v={{ site.time | date: '%s' }}"></script>
+    <script src="js/confetti.js?v={{ site.time | date: '%s' }}"></script>
+    <script src="js/analytics.js?v={{ site.time | date: '%s' }}"></script>
 </body>
 
 </html>
