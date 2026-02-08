@@ -198,11 +198,12 @@ function handle_win(winner_user) {
         if (leaderboardSection) leaderboardSection.style.display = 'flex';
     }
 
-    document.getElementById('winner-avatar').src = '';
+    const winnerAvatar = document.getElementById('winner-avatar');
+    winnerAvatar.src = '';
     getTwitchUserData(winner_user.username).then((user) => {
         console.log(user);
-        document.getElementById('winner-avatar').src = user.logo;
-        document.getElementById('winner-avatar').style = win_avatar_enable ? '' : 'filter: blur(10px);';
+        winnerAvatar.src = user.logo;
+        winnerAvatar.classList.toggle('blurred', !win_avatar_enable);
     });
 
     const winnerBlock = document.getElementById('winner');

@@ -319,9 +319,13 @@ section {
     overflow: hidden;
 }
 
-#winner-avatar:hover {
-    filter: none !important;
-    transition: all 0.5s;
+#winner-avatar.blurred {
+    filter: blur(10px);
+    transition: filter 0.5s;
+}
+
+#winner-avatar.blurred:hover {
+    filter: none;
 }
 
 #winner .winner-name {
