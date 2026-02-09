@@ -66,6 +66,11 @@ nav li:hover span {
     transform: rotate(10deg);
 }
 
+nav li:active span {
+    transform: rotate(10deg) scale(1.2);
+    filter: brightness(1.2);
+}
+
 #menu-button-tip {
     display: none;
     opacity: 0.25;
