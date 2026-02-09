@@ -321,7 +321,6 @@ section {
 
 #winner-avatar.blurred {
     filter: blur(10px);
-    transition: filter 0.5s;
 }
 
 #winner .winner-name {
