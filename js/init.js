@@ -4,6 +4,7 @@ let secret_word_id = '';
 let words_count = 0;
 let tmi_client = null;
 let wordQueue = [];
+let win_avatar_enable = false;
 
 async function generate_secret_word() {
     const data = await kontekstno_query({ method: 'random-challenge' });
@@ -104,12 +105,12 @@ async function runQueue() {
     if (wordQueue.length > 0) {
         runQueue()
     }
-
 }
 
 function loadSettings() {
     const storedChannel = localStorage.getItem('channel_name');
     const storedRestartTime = localStorage.getItem('restart_time');
+    const storedAvatarInput = localStorage.getItem('win_avatar_enable');
 
     if (storedChannel) {
         channel_name = storedChannel;
@@ -123,6 +124,12 @@ function loadSettings() {
         if (restartInput) restartInput.value = restart_time;
     }
 
+    if (storedAvatarInput) {
+        win_avatar_enable = JSON.parse(storedAvatarInput);
+        const avatarInput = document.getElementById('win-avatar-enable');
+        if (avatarInput) avatarInput.checked = win_avatar_enable;
+    }
+
     return !!channel_name;
 }
 
@@ -131,6 +138,7 @@ if (saveBtn) {
     saveBtn.addEventListener('click', () => {
         const channelInput = document.getElementById('channel-name');
         const restartInput = document.getElementById('restart-time');
+        const avatarInput = document.getElementById('win-avatar-enable');
 
         if (channelInput && channelInput.value) {
             localStorage.setItem('channel_name', channelInput.value.trim());
@@ -138,6 +146,10 @@ if (saveBtn) {
 
         if (restartInput && restartInput.value) {
             localStorage.setItem('restart_time', restartInput.value.trim());
+        }
+
+        if (avatarInput) {
+            localStorage.setItem('win_avatar_enable', avatarInput.checked);
         }
 
         // скрываем блок настроек после сохранения для визуальной индикации успешного сохранения. возможно добавить тост всплавающий? возможно галочку рядом на секунду показывать?
@@ -194,6 +206,7 @@ async function app() {
 
 const channelInput = document.getElementById("channel-name");
 const restartInput = document.getElementById("restart-time");
+const avatarInput = document.getElementById('win-avatar-enable');
 let validationTimeout;
 
 function checkFormsValidity() {
@@ -248,6 +261,10 @@ channelInput.addEventListener("input", () => {
 
 restartInput.addEventListener("input", () => {
     restartInput.reportValidity();
+    checkFormsValidity();
+});
+
+avatarInput.addEventListener("input", () => {
     checkFormsValidity();
 });
 
