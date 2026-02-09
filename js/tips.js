@@ -1,5 +1,4 @@
-const kontekstno_api_max_distance = 300; // апи не реагирует на число больше 300
-let best_found_distance = kontekstno_api_max_distance;
+let best_found_distance = kontekstno_api_tips_max_distance;
 let tip_requests_users = new Set();
 let tip_last_reset_time = Date.now();
 let tip_cooldown_time = 1000 * 60 * 1;
@@ -19,7 +18,7 @@ const tip_menu_button = document.getElementById('menu-button-tip');
 async function use_tip(user = '', force = false) {
     // console.log('enter "use_tip"', user);
     if (tip_requests_users.has(user) && !force) return;
-    if (!best_found_distance) best_found_distance = kontekstno_api_max_distance;
+    if (!best_found_distance) best_found_distance = kontekstno_api_tips_max_distance;
 
     let tip_time_left = tip_cooldown_time - (Date.now() - tip_last_reset_time);
     if (tip_time_left > 0 && !force) {
@@ -41,7 +40,7 @@ async function use_tip(user = '', force = false) {
     let fine_tuned_distance = Math.floor(best_found_distance * 1.5);
 
     // иначе она всегда будет kontekstno_api_max_distance, это магическое число апишки, большую дальность она сбрасывает к kontekstno_api_max_distance
-    if (fine_tuned_distance > kontekstno_api_max_distance) fine_tuned_distance = kontekstno_api_max_distance;
+    if (fine_tuned_distance > kontekstno_api_tips_max_distance) fine_tuned_distance = kontekstno_api_tips_max_distance;
 
     // edge case. Если логика апишки (Math.ceil(fine_tuned_distance / 2)) даст такое же значение, как и текущий best_found_distance, то не фейкаем его, чтобы всё не циклилось
     if (Math.ceil(fine_tuned_distance / 2) == best_found_distance) fine_tuned_distance = best_found_distance;
