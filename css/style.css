@@ -66,6 +66,11 @@ nav li:hover span {
     transform: rotate(10deg);
 }
 
+nav li:active span {
+    transform: rotate(10deg) scale(1.2);
+    filter: brightness(1.2);
+}
+
 #menu-button-tip {
     display: none;
     opacity: 0.25;
@@ -84,7 +89,22 @@ section {
 
 .content-box {}
 
-.logo span {
+.logo {
+    font-size: 36px;
+    font-weight: bold;
+    position: relative;
+    color: #FFF;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo:hover {
+    opacity: 1;
+}
+
+.logo .level {
     position: absolute;
     top: -5px;
     right: 0;
@@ -92,10 +112,20 @@ section {
     color: #777;
 }
 
-.logo {
-    font-size: 36px;
-    font-weight: bold;
-    position: relative;
+.logo:hover .icon {
+    animation: brain-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes brain-pulse {
+
+    from,
+    to {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 #info {
