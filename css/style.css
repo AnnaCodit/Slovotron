@@ -324,10 +324,6 @@ section {
     transition: filter 0.5s;
 }
 
-#winner-avatar.blurred:hover {
-    filter: none;
-}
-
 #winner .winner-name {
     font-size: 50px;
 }
