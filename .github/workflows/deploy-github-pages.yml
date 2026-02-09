@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: ["main"] # Срабатывает при пуше в main
+  workflow_dispatch:   # Позволяет запустить вручную кнопку
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+      - name: Cache Busting 🔨
+        run: |
+          # Создаем версию (текущее время в секундах)
+          VERSION=$(date +%s)
+          # Ищем все .html файлы и меняем __ASSETS_VERSION__ на цифры
+          # sed -i делает замену "in-place" (внутри файла) только на сервере сборки
+          find . -name "*.html" -print0 | xargs -0 sed -i "s/__ASSETS_VERSION__/$VERSION/g"
+          echo "Deployed version: $VERSION"
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: . # Загружаем всё из текущей папки
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages 🚀
+        id: deployment
+        uses: actions/deploy-pages@v4
