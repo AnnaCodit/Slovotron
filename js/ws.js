@@ -222,7 +222,7 @@ function handle_win(winner_user) {
         confetti_fireworks(confettiTimeout);
     }
 
-    if (restart_time > 0) {
+    if (restart_time > 0 && !document.hidden) {
         const menuTimer = document.getElementById('menu-timer');
         menuTimer.innerHTML = pad(restart_time);
         menuTimer.style.display = 'block'
