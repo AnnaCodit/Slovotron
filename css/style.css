@@ -329,6 +329,7 @@ section {
     box-shadow: none;
 }
 
+/* TODO: вынести стили победителя или всего лидерборда в отдельный файл */
 #winner {
     padding: 20px;
     background: #222;
@@ -369,21 +370,22 @@ section {
 }
 
 .decor-trophy {
-    bottom: -20px;
-    right: -35px;
-    animation: sway 3s ease-in-out infinite alternate;
+    bottom: -30px;
+    right: 35px;
+    animation: sway 5s ease-in-out infinite alternate;
+    font-size: 2.1em;
 }
 
 .decor-star-1 {
-    top: -25px;
-    left: -35px;
+    top: 0px;
+    left: -27px;
     font-size: 2.5rem;
     animation: pulse 2s ease-in-out infinite;
 }
 
 .decor-star-2 {
-    bottom: 10px;
-    left: -45px;
+    bottom: -3px;
+    left: -30px;
     font-size: 2rem;
     animation: float-simple 4s ease-in-out infinite reverse;
 }
@@ -391,7 +393,8 @@ section {
 .decor-party {
     top: -35px;
     right: -35px;
-    animation: sway 2.5s ease-in-out infinite;
+    animation: winnew-party 2.5s ease-in-out infinite;
+    font-size: 2.4em;
 }
 
 @keyframes float-crown {
@@ -419,12 +422,26 @@ section {
 }
 
 @keyframes sway {
-    0% {
+
+    0%,
+    100% {
         transform: rotate(-15deg);
     }
 
-    100% {
+    50% {
         transform: rotate(15deg);
+    }
+}
+
+@keyframes winnew-party {
+
+    0%,
+    100% {
+        transform: rotate(-15deg) translateY(0);
+    }
+
+    50% {
+        transform: rotate(15deg) translateY(10px);
     }
 }
 
@@ -432,11 +449,11 @@ section {
 
     0%,
     100% {
-        transform: scale(1);
+        transform: scale(1) rotate(-10deg);
     }
 
     50% {
-        transform: scale(1.2);
+        transform: scale(1.2) rotate(0deg);
     }
 }
 
@@ -456,6 +473,7 @@ section {
     max-width: 80px;
     border-radius: 300px;
     overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
 }
 
 #winner-avatar.blurred {
@@ -464,6 +482,7 @@ section {
 
 #winner .winner-name {
     font-size: 50px;
+    text-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
 }
 
 .guessing {
