@@ -13,6 +13,7 @@ ym(yandex_metrica_id, 'init', { ssr: true, webvisor: true, clickmap: true, ecomm
 // сохранение данных о достижении цели в аналитику
 function analytics_reach_goal(goal = '', params = {}) {
     waitForYm(() => {
+        console.log('Отправили достижение цели в яндекс.метрику', goal, params);
         ym(yandex_metrica_id, 'reachGoal', goal, params);
     });
 }
@@ -20,6 +21,7 @@ function analytics_reach_goal(goal = '', params = {}) {
 // сохранение данных о посетителе в аналитику
 function analytics_set_visit_params(params = {}) {
     waitForYm(() => {
+        console.log('Отправили параметр визита в яндекс.метрику', params);
         ym(yandex_metrica_id, 'params', params);
     });
 }
