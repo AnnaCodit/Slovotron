@@ -12,9 +12,6 @@ const tip_menu_button = document.getElementById('menu-button-tip');
 //     console.log('best_found_distance', best_found_distance)
 // }, 5000)
 
-
-// TODO: сделать так чтобы подсказку в рамках запроса одной подсказки до ее сброса, пользователь мог запросить лишь один раз
-
 async function use_tip(user = '', force = false) {
     // console.log('enter "use_tip"', user);
     if (tip_requests_users.has(user) && !force) return;
