@@ -1,0 +1,11 @@
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /css/style.css?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /css/leaderboard.css?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /img/github.png HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /css/reset.css HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /js/ws.js?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /js/leaderboard.js?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /js/tips.js?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /js/init.js?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /js/confetti.js?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 22:35:53] "GET /js/analytics.js?v=__ASSETS_VERSION__ HTTP/1.1" 200 -
