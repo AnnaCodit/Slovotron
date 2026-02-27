@@ -81,11 +81,17 @@ function create_chat_connection(channel_name = '') {
             return;
         }
 
-        // prevent xss attack from message
-        message = message.replace(/[^a-zA-Zа-яА-ЯёЁ0-9]/g, '');
-        if (message.length < 2) return;
+        // Приводим ЛЕД и ЛЁД к одному виду
+        message = message.replace(/ё/gi, 'е');
 
-        message = message.replace(/ё/g, 'е');
+        // prevent xss attack 
+        // числа убираем тоже, потому что апишка контекстно зачем-то считает валидными+однинаковыми и слово СТОЛ и СТОЛ12345 (бредик да)
+        message = message.replace(/[^a-zA-Zа-яА-Я]/g, '');
+
+        // а можно вот так, останутся любые буквы любого языка. задел на мультиязычную версию.
+        // message = message.replace(/[^\p{L}]/gu, ''); 
+
+        if (message.length < 2) return;
 
         words_count++;
         if (words_count === 1) {
