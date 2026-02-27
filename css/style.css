@@ -393,7 +393,7 @@ section {
 .decor-party {
     top: -35px;
     right: -35px;
-    animation: winnew-party 2.5s ease-in-out infinite;
+    animation: winner-party 2.5s ease-in-out infinite;
     font-size: 2.4em;
 }
 
@@ -433,7 +433,7 @@ section {
     }
 }
 
-@keyframes winnew-party {
+@keyframes winner-party {
 
     0%,
     100% {
