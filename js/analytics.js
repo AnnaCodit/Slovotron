@@ -34,5 +34,5 @@ function waitForYm(callback) {
     }
     setTimeout(() => {
         waitForYm(callback);
-    }, 5000);
+    }, 1000);
 }
