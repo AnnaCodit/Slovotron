@@ -5,6 +5,7 @@ let menuTimerId, resetRoundTimeoutId, resetTimerPaused, roundStartTime, uniqWord
 let uniqUsers = new Set();
 const checked_words = new Map();
 const last_words_container = document.querySelector('.guessing .last-words');
+const best_match_container = document.querySelector('.guessing .best-match');
 const MAX_LAST_WORDS = 20;
 const kontekstno_api_tips_max_distance = 300; // апи подсказок не реагирует на число больше 300
 
@@ -139,9 +140,6 @@ async function process_message(user, nickname_color, word, force_win = false) {
 }
 
 function addMatchWord(new_message, distance) {
-    // добавить слово в колонку .guessing .best-match в верх списка
-    const best_match_container = document.querySelector('.guessing .best-match');
-
     // Создаем элемент из HTML строки
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = new_message.trim();
@@ -265,8 +263,8 @@ async function resetRoundTimeout(time) {
 }
 
 function reset_round() {
-    document.querySelector('.guessing .last-words').innerHTML = '';
-    document.querySelector('.guessing .best-match').innerHTML = '';
+    last_words_container.innerHTML = '';
+    best_match_container.innerHTML = '';
     tip_menu_button.style.display = 'block';
     checked_words.clear();
     roundStartTime = Date.now();
