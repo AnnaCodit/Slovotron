@@ -5,12 +5,28 @@ let tip_cooldown_time = 1000 * 60 * 1;
 let tip_distance_tune_multiplier = 1.5; // механика подсказок такова что апишка контекстно дает слово вдвое ближе чем last_word_rank. мультипликатор нужен чтобы это поправить как нам надо. например: лучшая дистанция 100, мультипликатор 1.5, подсказка даст дальность 75 вместо 50.
 const tip_menu_button = document.getElementById('menu-button-tip');
 
+const tip_progress_fill = document.getElementById('tip-progress-fill');
+const tip_count_current = document.getElementById('tip-count-current');
+const tip_count_total = document.getElementById('tip-count-total');
+
 // let tip_requests_count = 0;
 
 // output best_found_distance in console once per 5 seconds
 // setInterval(() => {
 //     console.log('best_found_distance', best_found_distance)
 // }, 5000)
+
+function update_tip_progress() {
+    let tip_required = Math.floor(uniqUsers.size / 2);
+    let tip_requests_count = tip_requests_users.size;
+
+    if (tip_progress_fill) {
+        let progress = tip_required > 0 ? (tip_requests_count / tip_required) * 100 : 100;
+        tip_progress_fill.style.width = Math.min(100, progress) + '%';
+    }
+    if (tip_count_current) tip_count_current.innerText = tip_requests_count;
+    if (tip_count_total) tip_count_total.innerText = tip_required;
+}
 
 async function use_tip(user = '', force = false) {
     // console.log('enter "use_tip"', user);
@@ -27,6 +43,8 @@ async function use_tip(user = '', force = false) {
     let tip_requests_count = tip_requests_users.size;
     let tip_required = Math.floor(uniqUsers.size / 2); // сколько нужно людей для подсказки 
     // console.log('tip_requests:', tip_requests_count, 'tip_required:', tip_required);
+
+    update_tip_progress();
 
     if (tip_requests_count < tip_required && !force) {
         addTextToLastWords('Нужно человек для использования подсказки: <b>' + (tip_required - tip_requests_count) + '</b>');
@@ -72,10 +90,14 @@ async function use_tip(user = '', force = false) {
 function reset_tips() {
     tip_requests_users.clear(); // очищаем список пользователей которые использовали подсказку
     tip_last_reset_time = Date.now(); // обновляем время последнего использования подсказки
+    update_tip_progress();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     tip_menu_button.addEventListener('click', function () {
         use_tip('', true);
     });
+    // Обновляем прогресс при загрузке и периодически (так как uniqUsers меняется в другом файле)
+    update_tip_progress();
+    setInterval(update_tip_progress, 2000);
 });

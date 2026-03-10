@@ -1,0 +1,53 @@
+#tip-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#tip-progress .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 400px;
+    min-width: 300px;
+    position: relative;
+    background-color: #000;
+}
+
+#tip-progress-fill {
+    height: 30px;
+    width: 50%;
+    background-color: #005f00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#tip-progress .bulb {
+    position: absolute;
+    left: -31px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 50px;
+}
+
+#tip-progress .label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#tip-progress .count {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 5px 10px;
+    background-color: #555;
+    border-radius: 5px;
+}

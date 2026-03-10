@@ -8,6 +8,7 @@
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="css/style.css?v=__ASSETS_VERSION__">
     <link rel="stylesheet" href="css/leaderboard.css?v=__ASSETS_VERSION__">
+    <link rel="stylesheet" href="css/tips.css?v=__ASSETS_VERSION__">
     <!-- Система отслеживания ошибок фронтэнда Sentry. В будущем можно попробовать еще LogRocket -->
     <script src="https://js.sentry-cdn.com/d96be4f9b0094010cb3a23e45d5e4bf6.min.js" crossorigin="anonymous"></script>
     <!-- Взаимодействие с твичом -->
@@ -54,6 +55,16 @@
         <section id="info" class="content-box">
             <div>Привет 👋 Укажи в настройках название своего Twitch-канала и затем начинайте писать в чате слова. Чем
                 меньше цифра справа от слова - тем ближе вы к отгадке! Удачи <span id="test-win-btn">🎉</span></div>
+        </section>
+        <section id="tip-progress" class="content-box">
+            <div class="bar">
+                <div class="label">!Подсказка</div>
+                <div class="bulb">💡</div>
+                <div id="tip-progress-fill"></div>
+                <div class="count">
+                    <span id="tip-count-current">0</span> / <span id="tip-count-total">0</span>
+                </div>
+            </div>
         </section>
         <section id="settings" class="content-box" style="display: none;">
             <div class="setting">
