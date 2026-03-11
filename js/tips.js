@@ -42,7 +42,7 @@ function update_tip_progress() {
 
 async function use_tip(user = '', force = false) {
     // console.log('enter "use_tip"', user);
-    if (tip_requests_users.has(user) && !force) return;
+    if (user && tip_requests_users.has(user) && !force) return;
     if (!best_found_distance) best_found_distance = kontekstno_api_tips_max_distance;
 
     let tip_time_left = tip_cooldown_time - (Date.now() - tip_last_reset_time);
@@ -51,7 +51,7 @@ async function use_tip(user = '', force = false) {
         // console.log('До использования подсказки осталось', tip_time_left / 1000, 'секунд');
         return;
     }
-    tip_requests_users.add(user);
+    if (user) tip_requests_users.add(user);
     let tip_requests_count = tip_requests_users.size;
     let tip_required = Math.floor(uniqUsers.size / 2); // сколько нужно людей для подсказки 
     // console.log('tip_requests:', tip_requests_count, 'tip_required:', tip_required);
