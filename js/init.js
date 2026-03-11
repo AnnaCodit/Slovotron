@@ -127,7 +127,7 @@ function create_chat_connection(channel_name = '') {
         if (message.split(' ').length > 1 || message.length > 20 || message.length <= 1 || !isNaN(message)) return;
 
         // проверка на подсказку, дальше не идем
-        if (message.toLowerCase().startsWith('!подсказка')) {
+        if (message.toLowerCase().startsWith('!подска') || message.toLowerCase().startsWith('! подска')) {
             use_tip(user['username']);
             return;
         }
