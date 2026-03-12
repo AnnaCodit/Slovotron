@@ -26,6 +26,7 @@
     align-items: center;
     justify-content: center;
     transition: width 0.4s ease-out;
+    border-radius: 10px;
 }
 
 #tip-progress .bulb {
