@@ -171,6 +171,7 @@ function loadSettings() {
     const storedChannel = urlParams.get('channel_name') || localStorage.getItem('channel_name');
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
     const storedAvatarInput = urlParams.get('win_avatar_enable') || localStorage.getItem('win_avatar_enable');
+    const minimal = urlParams.get('minimal') ? true : false;
 
     if (storedChannel) {
         channel_name = storedChannel;
@@ -188,6 +189,18 @@ function loadSettings() {
         win_avatar_enable = JSON.parse(storedAvatarInput);
         const avatarInput = document.getElementById('win-avatar-enable');
         if (avatarInput) avatarInput.checked = win_avatar_enable;
+    }
+
+    if (minimal) {
+        const footers = document.getElementsByTagName('footer');
+        while (footers.length > 0) {
+            footers[0].remove();
+        }
+        const navs = document.getElementsByTagName('nav');
+        while (navs.length > 0) {
+            navs[0].remove();
+        }
+        document.querySelector('#info.content-box').style.display = 'none';
     }
 
     return !!channel_name;
