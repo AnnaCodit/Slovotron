@@ -171,7 +171,8 @@ function loadSettings() {
     const storedChannel = urlParams.get('channel_name') || localStorage.getItem('channel_name');
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
     const storedAvatarInput = urlParams.get('win_avatar_enable') || localStorage.getItem('win_avatar_enable');
-    const minimal = urlParams.get('minimal') ? true : false;
+    const minimal = !!urlParams.get('minimal');
+    const transparentBackground = !!urlParams.get('overlay');
 
     if (storedChannel) {
         channel_name = storedChannel;
@@ -201,6 +202,10 @@ function loadSettings() {
             navs[0].remove();
         }
         document.querySelector('#info.content-box').style.display = 'none';
+    }
+
+    if (transparentBackground) {
+        document.body.style.backgroundColor = "#00000000";
     }
 
     return !!channel_name;
