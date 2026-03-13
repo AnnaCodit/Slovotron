@@ -1,5 +1,7 @@
 let channel_name = '';
 let restart_time = 20;
+let win_avatar_enable = false;
+let sound_enable = true;
 let is_game_finished = false;
 let menuTimerId, resetRoundTimeoutId, resetTimerPaused, roundStartTime, uniqWords, repeatWords, winTime;
 let uniqUsers = new Set();
@@ -168,9 +170,11 @@ function addMatchWord(new_message, distance) {
     }
 
     if (insertIndex === 0 && newDistance < 150) {
-        const audio = new Audio('audio/slovotron-ding-1.mp3');
-        audio.volume = 0.1;
-        audio.play().catch(e => console.error('Ошибка воспроизведения звука:', e));
+        if (sound_enable) {
+            const audio = new Audio('audio/slovotron-ding-1.mp3');
+            audio.volume = 0.1;
+            audio.play().catch(e => console.error('Ошибка воспроизведения звука:', e));
+        }
     }
 
     // Вставляем элемент в правильную позицию

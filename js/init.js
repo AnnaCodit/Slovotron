@@ -4,7 +4,6 @@ let secret_word_id = '';
 let words_count = 0;
 let tmi_client = null;
 let wordQueue = [];
-let win_avatar_enable = false;
 
 async function generate_secret_word() {
     let room_id;
@@ -169,6 +168,7 @@ function loadSettings() {
     const storedChannel = localStorage.getItem('channel_name');
     const storedRestartTime = localStorage.getItem('restart_time');
     const storedAvatarInput = localStorage.getItem('win_avatar_enable');
+    const storedSoundInput = localStorage.getItem('sound_enable');
 
     if (storedChannel) {
         channel_name = storedChannel;
@@ -188,6 +188,12 @@ function loadSettings() {
         if (avatarInput) avatarInput.checked = win_avatar_enable;
     }
 
+    if (storedSoundInput) {
+        sound_enable = JSON.parse(storedSoundInput);
+        const soundInput = document.getElementById('sound-enable');
+        if (soundInput) soundInput.checked = sound_enable;
+    }
+
     return !!channel_name;
 }
 
@@ -197,6 +203,7 @@ if (saveBtn) {
         const channelInput = document.getElementById('channel-name');
         const restartInput = document.getElementById('restart-time');
         const avatarInput = document.getElementById('win-avatar-enable');
+        const soundInput = document.getElementById('sound-enable');
 
         if (channelInput && channelInput.value) {
             localStorage.setItem('channel_name', channelInput.value.trim());
@@ -208,6 +215,10 @@ if (saveBtn) {
 
         if (avatarInput) {
             localStorage.setItem('win_avatar_enable', avatarInput.checked);
+        }
+
+        if (soundInput) {
+            localStorage.setItem('sound_enable', soundInput.checked);
         }
 
         // скрываем блок настроек после сохранения для визуальной индикации успешного сохранения. возможно добавить тост всплавающий? возможно галочку рядом на секунду показывать?
@@ -265,6 +276,7 @@ async function app() {
 const channelInput = document.getElementById("channel-name");
 const restartInput = document.getElementById("restart-time");
 const avatarInput = document.getElementById('win-avatar-enable');
+const soundInput = document.getElementById('sound-enable');
 let validationTimeout;
 
 function checkFormsValidity() {
@@ -325,5 +337,11 @@ restartInput.addEventListener("input", () => {
 avatarInput.addEventListener("input", () => {
     checkFormsValidity();
 });
+
+if (soundInput) {
+    soundInput.addEventListener("input", () => {
+        checkFormsValidity();
+    });
+}
 
 app();
