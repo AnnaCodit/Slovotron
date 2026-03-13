@@ -184,7 +184,7 @@ function loadSettings() {
     }
 
     if (storedAvatarInput) {
-        win_avatar_enable = JSON.parse(storedAvatarInput);
+        win_avatar_enable = storedAvatarInput === 'true';
         const avatarInput = document.getElementById('win-avatar-enable');
         if (avatarInput) avatarInput.checked = win_avatar_enable;
     }
