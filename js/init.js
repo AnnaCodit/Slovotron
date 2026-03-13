@@ -166,9 +166,11 @@ async function runQueue() {
 }
 
 function loadSettings() {
-    const storedChannel = localStorage.getItem('channel_name');
-    const storedRestartTime = localStorage.getItem('restart_time');
-    const storedAvatarInput = localStorage.getItem('win_avatar_enable');
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const storedChannel = urlParams.get('channel_name') || localStorage.getItem('channel_name');
+    const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
+    const storedAvatarInput = urlParams.get('win_avatar_enable') || localStorage.getItem('win_avatar_enable');
 
     if (storedChannel) {
         channel_name = storedChannel;
