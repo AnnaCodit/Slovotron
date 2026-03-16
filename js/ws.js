@@ -1,11 +1,3 @@
-let channel_name = '';
-let restart_time = 20;
-let win_avatar_enable = false;
-let sound_enable = true;
-let is_game_finished = false;
-let menuTimerId, resetRoundTimeoutId, resetTimerPaused, roundStartTime, uniqWords, repeatWords, winTime;
-let uniqUsers = new Set();
-const checked_words = new Map();
 const last_words_container = document.querySelector('.guessing .last-words');
 const best_match_container = document.querySelector('.guessing .best-match');
 const MAX_LAST_WORDS = 20;

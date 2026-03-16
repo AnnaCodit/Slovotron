@@ -1,10 +1,5 @@
 
 
-let secret_word_id = '';
-let words_count = 0;
-let tmi_client = null;
-let wordQueue = [];
-
 function create_chat_connection(channel_name = '') {
 
     if (tmi_client) {
