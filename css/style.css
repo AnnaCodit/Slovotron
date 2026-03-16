@@ -417,9 +417,9 @@ input[type="submit"]:disabled {
 }
 
 /* app theme - obs-overlay */
-body.theme-obs-overlay nav,
-body.theme-obs-overlay #info,
-body.theme-obs-overlay footer.main,
-body.theme-obs-overlay footer.tech-things {
+.theme-obs-overlay nav,
+.theme-obs-overlay #info,
+.theme-obs-overlay footer.main,
+.theme-obs-overlay footer.tech-things {
     display: none;
 }
