@@ -172,10 +172,10 @@ function loadSettings() {
     if (cssFile) {
         try {
             let urlString = cssFile;
-            // Если ссылка не начинается с http, https или не является протокол-относительной
-            if (!/^(https?:)?\/\//.test(urlString)) {
+            // Если ссылка не начинается с http://, https:// или //
+            if (!urlString.startsWith('http://') && !urlString.startsWith('https://') && !urlString.startsWith('//')) {
                 urlString = 'https://' + urlString;
-            }
+            }            
 
             const cssUrl = new URL(urlString);
             cssUrl.searchParams.set('slv_timestamp', Date.now());
