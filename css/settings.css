@@ -1,0 +1,70 @@
+#settings {
+    padding: 20px;
+    background-color: #222;
+    border-radius: 10px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#settings .setting {
+    margin-bottom: 20px;
+}
+
+#settings .setting .title {
+    margin-bottom: 7px;
+}
+
+#settings .setting input {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background: #333;
+    color: #FFF;
+    font-size: 18px;
+}
+
+#settings .setting input:focus {
+    outline: 2px solid #777;
+}
+
+#settings .setting input:invalid {
+    outline: 2px solid rgba(255, 0, 0, 0.5);
+}
+
+#settings .setting:last-child {
+    margin-bottom: 0;
+}
+
+#settings .setting input[type="checkbox"] {
+    accent-color: #055c05;
+    width: 2em;
+    height: 2em;
+}
+
+#settings .checkbox-container {
+    display: flex;
+    align-items: center;
+}
+
+#settings button {
+    margin-top: 2px;
+}
+
+#settings .avatar-container {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+#settings .avatar {
+    position: absolute;
+    display: none;
+    right: 5px;
+    top: 5px;
+    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+}
