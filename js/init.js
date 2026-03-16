@@ -166,6 +166,17 @@ async function runQueue() {
 
 function loadSettings() {
     const urlParams = new URLSearchParams(window.location.search);
+
+    // Обработка темы приложения
+    let app_theme = urlParams.get('theme');
+    if (app_theme) {
+        // Оставляем только латинские буквы, дефис и подчеркивание
+        app_theme = app_theme.replace(/[^a-zA-Z\-_]/g, '');
+        if (app_theme.length > 0) {
+            document.body.classList.add(`theme-${app_theme}`);
+        }
+    }
+
     const storedChannel = urlParams.get('channel_name') || localStorage.getItem('channel_name');
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
     const storedAvatarInput = urlParams.get('win_avatar_enable') || localStorage.getItem('win_avatar_enable');
