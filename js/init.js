@@ -167,6 +167,28 @@ async function runQueue() {
 function loadSettings() {
     const urlParams = new URLSearchParams(window.location.search);
 
+    // Подключение внешнего CSS-файла
+    let cssFile = urlParams.get('cssFile');
+    if (cssFile) {
+        try {
+            let urlString = cssFile;
+            // Если ссылка не начинается с http://, https:// или //
+            if (!urlString.startsWith('http://') && !urlString.startsWith('https://') && !urlString.startsWith('//')) {
+                urlString = 'https://' + urlString;
+            }            
+
+            const cssUrl = new URL(urlString);
+            cssUrl.searchParams.set('slv_timestamp', Date.now());
+
+            const linkElement = document.createElement('link');
+            linkElement.rel = 'stylesheet';
+            linkElement.href = cssUrl.href;
+            document.head.appendChild(linkElement);
+        } catch (e) {
+            console.error(`Некорректный URL в параметре cssFile: "${cssFile}"`, e);
+        }
+    }
+
     // Обработка темы приложения
     let app_theme = urlParams.get('theme');
     if (app_theme) {
