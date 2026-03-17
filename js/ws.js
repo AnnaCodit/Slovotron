@@ -1,11 +1,3 @@
-let channel_name = '';
-let restart_time = 20;
-let win_avatar_enable = false;
-let sound_enable = true;
-let is_game_finished = false;
-let menuTimerId, resetRoundTimeoutId, resetTimerPaused, roundStartTime, uniqWords, repeatWords, winTime;
-let uniqUsers = new Set();
-const checked_words = new Map();
 const last_words_container = document.querySelector('.guessing .last-words');
 const best_match_container = document.querySelector('.guessing .best-match');
 const MAX_LAST_WORDS = 20;
@@ -30,14 +22,6 @@ function addTextToLastWords(text = '') {
         </div>`
     addAnythingToLastWords(html);
 }
-
-const iwawwa = new Set(['ивавва', 'ивава', 'акане', 'аканэ', 'iwawwa', 'iwawa', 'akane']);
-const iwawwa_img = [
-    'iwawwa_2.avif',
-    'iwawwa_3.avif',
-    'iwawwa_4.avif',
-    'iwawwa_5.avif'
-];
 
 function getDistanceColor(distance) {
     const colors = [
@@ -84,19 +68,11 @@ async function process_message(user, nickname_color, word, force_win = false) {
         addTextToLastWords(word + ' уже было использовано');
         // console.log(`Слово "${word}" уже было проверено.`);
         return
-    } else if (iwawwa.has(word)) {
-        const pig = iwawwa_img[Math.floor(Math.random() * iwawwa_img.length)];
-        const html = `
-        <div class="msg">
-            <div class="msg-content">
-                <div class="iwawwa">
-                    <div class="word"><img src="img/iwawwa_1.avif"></div>
-                    <div class="distance"><img src="img/${pig}"></div>
-                </div>
-            </div>
-        </div>`
-        addAnythingToLastWords(html);
-        return
+    }
+
+    // Проверяем пасхалки
+    if (typeof check_easter_egg === 'function' && check_easter_egg(word)) {
+        return;
     }
 
     // Если слова нет — выполняем логику
@@ -298,10 +274,6 @@ document.getElementById('test-win-btn').addEventListener('click', () => {
     process_message({ username: 'TestUser', 'display-name': 'TestUser' }, '#8A2BE2', 'WinWord' + randomSuffix, true);
 });
 
-document.getElementById('menu-button-settings').addEventListener('click', () => {
-    const settingsSection = document.getElementById('settings');
-    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
-});
 document.getElementById('menu-button-info').addEventListener('click', () => {
     const infoSection = document.getElementById('info');
     infoSection.style.display = infoSection.style.display === 'none' ? 'block' : 'none';
