@@ -101,9 +101,9 @@ async function getTwitchUserData(username) {
             return data[0];
         } else {
             console.error("Пользователь не найден");
-            return null;
         }
     } catch (error) {
         console.error("Ошибка запроса:", error);
     }
+    return null;
 }
