@@ -40,7 +40,11 @@ function loadSettings() {
         }
     }
 
-    const storedChannel = urlParams.get('channel_name') || localStorage.getItem('channel_name');
+    const urlChannel = urlParams.get('channel_name');
+    if (urlChannel) {
+        localStorage.setItem('channel_name', urlChannel);
+    }
+    const storedChannel = urlChannel || localStorage.getItem('channel_name');
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
     const storedAvatarInput = urlParams.get('win_avatar_enable') || localStorage.getItem('win_avatar_enable');
     const storedSoundInput = urlParams.get('sound_enable') || localStorage.getItem('sound_enable');
