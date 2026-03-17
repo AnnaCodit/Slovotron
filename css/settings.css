@@ -47,6 +47,14 @@
 #settings .checkbox-container {
     display: flex;
     align-items: center;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+#settings .checkbox-container .title {
+    margin-bottom: 0;
+    cursor: pointer;
 }
 
 #settings button {
