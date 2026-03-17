@@ -1,4 +1,3 @@
-let best_found_distance = kontekstno_api_tips_max_distance;
 let tip_requests_users = new Set();
 let tip_last_reset_time = Date.now();
 let tip_cooldown_time = 1000 * 60 * 1;
