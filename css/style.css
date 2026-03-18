@@ -388,3 +388,42 @@ input[type="submit"]:disabled {
 .theme-obs-overlay #leaderboard .title {
     margin-bottom: 10px;
 }
+
+/* временный фикс для обс и Квантума */
+@media all and (max-width: 799px) {
+
+    header.main {
+        padding-top: 7px;
+        padding-bottom: 15px;
+    }
+
+    section {
+        margin-bottom: 30px;
+    }
+
+    #winner .title {
+        display: none;
+    }
+
+    /* hide 4 and 5 elements */
+    #leaderboard .list *:nth-child(n+4) {
+        display: none;
+    }
+
+    /* remove border from 3 elements */
+    #leaderboard .list *:nth-child(3) {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    #statistic,
+    #leaderboard {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    #statistic .title,
+    #leaderboard .title {
+        margin-bottom: 10px;
+    }
+}
