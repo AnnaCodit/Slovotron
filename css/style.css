@@ -353,3 +353,38 @@ input[type="submit"]:disabled {
 .theme-obs-overlay footer.tech-things {
     display: none;
 }
+
+.theme-obs-overlay header.main {
+    padding-top: 7px;
+    padding-bottom: 15px;
+}
+
+.theme-obs-overlay section {
+    margin-bottom: 30px;
+}
+
+.theme-obs-overlay #winner .title {
+    display: none;
+}
+
+/* hide 4 and 5 elements */
+.theme-obs-overlay #leaderboard .list *:nth-child(n+4) {
+    display: none;
+}
+
+/* remove border from 3 elements */
+.theme-obs-overlay #leaderboard .list *:nth-child(3) {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.theme-obs-overlay #statistic,
+.theme-obs-overlay #leaderboard {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.theme-obs-overlay #statistic .title,
+.theme-obs-overlay #leaderboard .title {
+    margin-bottom: 10px;
+}
