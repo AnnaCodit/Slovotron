@@ -68,11 +68,6 @@ async function process_message(user, nickname_color, word, force_win = false) {
         return
     }
 
-    // Проверяем пасхалки
-    if (typeof check_easter_egg === 'function' && check_easter_egg(word)) {
-        return;
-    }
-
     // Если слова нет — выполняем логику
     console.log(`Новое слово: ${word}. Обрабатываю...`);
 
