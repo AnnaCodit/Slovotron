@@ -40,6 +40,11 @@ function loadSettings() {
         }
     }
 
+    // Обработка отдельно режима для OBS
+    if (urlParams.has('obs-overlay')) {
+        document.body.classList.add('obs-overlay');
+    }
+
     const urlChannel = urlParams.get('channel_name');
     if (urlChannel) {
         localStorage.setItem('channel_name', urlChannel);

@@ -3,7 +3,7 @@
 /* core */
 
 body {
-    background: #151515;
+    background-color: #151515;
     color: #FFF;
     font-size: 20px;
     font-family: "Google Sans", sans-serif;
@@ -390,7 +390,7 @@ input[type="submit"]:disabled {
 }
 
 /* временный фикс для обс и Квантума */
-@media all and (max-width: 799px) {
+@media all and (max-width: 800px) {
 
     header.main {
         padding-top: 7px;
@@ -426,4 +426,47 @@ input[type="submit"]:disabled {
     #leaderboard .title {
         margin-bottom: 10px;
     }
+}
+
+/* Специальные стили для режима obs-overlay */
+.obs-overlay nav,
+.obs-overlay #info,
+.obs-overlay footer.main,
+.obs-overlay footer.tech-things {
+    display: none;
+}
+
+.obs-overlay header.main {
+    padding-top: 7px;
+    padding-bottom: 15px;
+}
+
+.obs-overlay section {
+    margin-bottom: 30px;
+}
+
+.obs-overlay #winner .title {
+    display: none;
+}
+
+/* hide 4 and 5 elements */
+.obs-overlay #leaderboard .list *:nth-child(n+4) {
+    display: none;
+}
+
+/* remove border from 3 elements */
+.obs-overlay #leaderboard .list *:nth-child(3) {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.obs-overlay #statistic,
+.obs-overlay #leaderboard {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.obs-overlay #statistic .title,
+.obs-overlay #leaderboard .title {
+    margin-bottom: 10px;
 }
