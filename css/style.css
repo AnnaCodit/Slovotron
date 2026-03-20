@@ -187,11 +187,12 @@ section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px 2px;
+    padding: 10px 15px;
+    height: 52px;
 }
 
-.guessing .iwawwa .distance {
-    animation: fadeInOpacity 2s;
+.guessing .iwawwa img {
+    max-height: 42px;
 }
 
 .guessing .word {

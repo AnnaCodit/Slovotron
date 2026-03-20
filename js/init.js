@@ -29,6 +29,11 @@ function create_chat_connection(channel_name = '') {
             return;
         }
 
+        // Проверяем пасхалки
+        if (typeof check_easter_egg === 'function' && check_easter_egg(message)) {
+            return;
+        }
+
         // если в сообщении больше двух слов, 20 символов, слишком короткое или число, то игнорируем
         if (message.split(' ').length > 1 || message.length > 20 || message.length <= 1 || !isNaN(message)) return;
 
