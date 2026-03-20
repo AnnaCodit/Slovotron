@@ -36,6 +36,7 @@ function check_easter_egg(input) {
             </div>`;
 
             addAnythingToLastWords(html);
+            // Особый случай для "фраза": показать пасхалку, но также разрешить обработку слова как обычной догадки
             if (word == "фраза") {return false;}
             return true;
         }
