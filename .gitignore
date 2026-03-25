@@ -1,4 +1,5 @@
 test/
 .DS_Store
 ._*
+desktop.ini
 node_modules/
