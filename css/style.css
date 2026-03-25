@@ -247,6 +247,15 @@ footer.tech-things {
     color: #555;
 }
 
+.ui-cols {
+    display: flex;
+    align-items: flex-start;
+}
+
+.ui-cols>* {
+    flex: 1;
+}
+
 .button,
 button,
 input[type="button"],

@@ -72,35 +72,43 @@
             </div>
         </section>
         <section id="settings" class="content-box" style="display: none;">
-            <div class="setting">
-                <div class="title">Имя канала на Twitch</div>
-                <div class="avatar-container">
-                    <input type="text" id="channel-name" name="channel_name" placeholder="fra3a" required>
-                    <img id="setting-avatar" class="avatar">
+            <div class="ui-cols settings-items-wrapper">
+                <div class="ui-col">
+                    <div class="setting">
+                        <div class="title">Имя канала на Twitch</div>
+                        <div class="avatar-container">
+                            <input type="text" id="channel-name" name="channel_name" placeholder="fra3a" required>
+                            <img id="setting-avatar" class="avatar">
+                        </div>
+                    </div>
+                    <div class="setting">
+                        <div class="title">Перезапуск игры после победы (секунды)</div>
+                        <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
+                    </div>
                 </div>
-            </div>
-            <div class="setting">
-                <div class="title">Перезапуск игры после победы (секунды)</div>
-                <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
-            </div>
-            <div class="setting checkbox-container">
-                <label class="title" for="win-avatar-enable">Показывать аватарку победителя?</label>
-                <div>
-                    <input type="checkbox" id="win-avatar-enable">
-                </div>
-            </div>
-            <div class="setting checkbox-container">
-                <label class="title" for="sound-enable">Включить звук?</label>
-                <div>
-                    <input type="checkbox" id="sound-enable" checked>
-                </div>
-            </div>
-            <!-- <div class="setting">
+                <div class="ui-col">
+                    <div class="setting checkbox-container">
+                        <label class="title" for="win-avatar-enable">Показывать аватарку победителя?</label>
+                        <div>
+                            <input type="checkbox" id="win-avatar-enable">
+                        </div>
+                    </div>
+                    <div class="setting checkbox-container">
+                        <label class="title" for="sound-enable">Включить звук?</label>
+                        <div>
+                            <input type="checkbox" id="sound-enable" checked>
+                        </div>
+                    </div>
+                    <!-- <div class="setting">
                 <div class="title">Поле для добавления слова</div>
                 <input type="checkbox" id="allow-add-word-checkbox" name="allow-add-word">
             </div> -->
-            <div class="setting">
-                <button id="save-settings-btn" disabled>Сохранить</button>
+                </div>
+            </div>
+            <div class="save-buttton-wrapper">
+                <div class="setting">
+                    <button id="save-settings-btn" disabled>Сохранить</button>
+                </div>
             </div>
         </section>
         <section id="leaderboard-statistic" style="display: none;">
