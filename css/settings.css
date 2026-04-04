@@ -1,10 +1,42 @@
 #settings {
-    padding: 20px;
-    background-color: #222;
-    border-radius: 10px;
+
     /* max-width: 300px; */
     margin-left: auto;
     margin-right: auto;
+}
+
+#settings .main-settings-box {
+    background-color: #222;
+    margin-bottom: 40px;
+    padding: 20px;
+    border-radius: 10px;
+
+
+}
+
+#settings .obs-link-box {
+    background-color: #222;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#settings .obs-link-box .setting input {
+    max-width: none;
+    width: 100%;
+}
+
+#settings .obs-link-box .setting .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#settings .obs-link-box .copy-icon {
+    width: 24px;
 }
 
 #settings .settings-items-wrapper {

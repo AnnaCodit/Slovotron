@@ -72,42 +72,60 @@
             </div>
         </section>
         <section id="settings" class="content-box" style="display: none;">
-            <div class="ui-cols settings-items-wrapper">
-                <div class="ui-col">
-                    <div class="setting">
-                        <div class="title">Имя канала на Twitch</div>
-                        <div class="avatar-container">
-                            <input type="text" id="channel-name" name="channel_name" placeholder="fra3a" required>
-                            <img id="setting-avatar" class="avatar">
+            <div class="main-settings-box">
+                <div class="ui-cols settings-items-wrapper">
+                    <div class="ui-col">
+                        <div class="setting">
+                            <div class="title">Имя канала на Twitch</div>
+                            <div class="avatar-container">
+                                <input type="text" id="channel-name" name="channel_name" placeholder="fra3a" required>
+                                <img id="setting-avatar" class="avatar">
+                            </div>
+                        </div>
+                        <div class="setting">
+                            <div class="title">Перезапуск игры после победы (секунды)</div>
+                            <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
                         </div>
                     </div>
-                    <div class="setting">
-                        <div class="title">Перезапуск игры после победы (секунды)</div>
-                        <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
-                    </div>
-                </div>
-                <div class="ui-col">
-                    <div class="setting checkbox-container">
-                        <label class="title" for="win-avatar-enable">Показывать аватарку победителя?</label>
-                        <div>
-                            <input type="checkbox" id="win-avatar-enable">
+                    <div class="ui-col">
+                        <div class="setting checkbox-container">
+                            <label class="title" for="win-avatar-enable">Показывать аватарку победителя?</label>
+                            <div>
+                                <input type="checkbox" id="win-avatar-enable">
+                            </div>
                         </div>
-                    </div>
-                    <div class="setting checkbox-container">
-                        <label class="title" for="sound-enable">Включить звук?</label>
-                        <div>
-                            <input type="checkbox" id="sound-enable" checked>
+                        <div class="setting checkbox-container">
+                            <label class="title" for="sound-enable">Включить звук?</label>
+                            <div>
+                                <input type="checkbox" id="sound-enable" checked>
+                            </div>
                         </div>
-                    </div>
-                    <!-- <div class="setting">
+                        <!-- <div class="setting">
                 <div class="title">Поле для добавления слова</div>
                 <input type="checkbox" id="allow-add-word-checkbox" name="allow-add-word">
             </div> -->
+                    </div>
+                </div>
+                <div class="save-buttton-wrapper">
+                    <div class="setting">
+                        <button id="save-settings-btn" disabled>Сохранить</button>
+                    </div>
                 </div>
             </div>
-            <div class="save-buttton-wrapper">
+            <div class="obs-link-box">
                 <div class="setting">
-                    <button id="save-settings-btn" disabled>Сохранить</button>
+                    <div class="title">
+                        <span>Ссылка для OBS</span>
+                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                            <path fill="currentColor"
+                                d="M288 64C252.7 64 224 92.7 224 128L224 384C224 419.3 252.7 448 288 448L480 448C515.3 448 544 419.3 544 384L544 183.4C544 166 536.9 149.3 524.3 137.2L466.6 81.8C454.7 70.4 438.8 64 422.3 64L288 64zM160 192C124.7 192 96 220.7 96 256L96 512C96 547.3 124.7 576 160 576L352 576C387.3 576 416 547.3 416 512L416 496L352 496L352 512L160 512L160 256L176 256L176 192L160 192z" />
+                        </svg>
+                    </div>
+                    <div class="obs-link">
+                        <input type="text" id="obs-link" name="obs_link"
+                            placeholder="Добавьте название канала в поле выше" required>
+                    </div>
                 </div>
             </div>
         </section>
