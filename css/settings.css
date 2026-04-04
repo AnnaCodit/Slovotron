@@ -27,6 +27,11 @@
     width: 100%;
 }
 
+#settings .obs-link-box .setting input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 #settings .obs-link-box .setting .title {
     display: flex;
     align-items: center;
@@ -37,6 +42,12 @@
 
 #settings .obs-link-box .copy-icon {
     width: 24px;
+    cursor: pointer;
+}
+
+#settings .obs-link-box .copy-icon:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
 }
 
 #settings .settings-items-wrapper {

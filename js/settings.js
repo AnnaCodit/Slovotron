@@ -3,7 +3,41 @@ const restartInput = document.getElementById("restart-time");
 const avatarInput = document.getElementById('win-avatar-enable');
 const soundInput = document.getElementById('sound-enable');
 const saveBtn = document.getElementById('save-settings-btn');
+const obsLinkInput = document.getElementById('obs-link');
 let validationTimeout;
+
+function generateObsLink() {
+    if (!channelInput || !channelInput.value.trim()) {
+        if (obsLinkInput) {
+            obsLinkInput.value = '';
+            obsLinkInput.disabled = true;
+            obsLinkInput.placeholder = 'Заполните название канала';
+        }
+        return;
+    }
+
+    const baseUrl = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams();
+
+    params.set('channel', channelInput.value.trim());
+
+    if (restartInput && restartInput.value) {
+        params.set('restart_time', restartInput.value.trim());
+    }
+
+    if (avatarInput) {
+        params.set('win_avatar_enable', avatarInput.checked ? '1' : '0');
+    }
+
+    if (soundInput) {
+        params.set('sound_enable', soundInput.checked ? '1' : '0');
+    }
+
+    if (obsLinkInput) {
+        obsLinkInput.value = baseUrl + '?' + params.toString();
+        obsLinkInput.disabled = false;
+    }
+}
 
 function loadSettings() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -74,6 +108,9 @@ function loadSettings() {
         if (soundInput) soundInput.checked = sound_enable;
     }
 
+    // Генерируем ссылку OBS при загрузке страницы
+    generateObsLink();
+
     return !!channel_name;
 }
 
@@ -94,6 +131,9 @@ if (saveBtn) {
         if (soundInput) {
             localStorage.setItem('sound_enable', soundInput.checked);
         }
+
+        // Генерируем ссылку для OBS
+        generateObsLink();
 
         // скрываем блок настроек после сохранения для визуальной индикации успешного сохранения.
         document.getElementById('settings').style.display = 'none';
@@ -187,5 +227,24 @@ if (avatarInput) {
 if (soundInput) {
     soundInput.addEventListener("input", () => {
         checkFormsValidity();
+    });
+}
+
+// Копирование ссылки для OBS при клике на иконку
+const copyIcon = document.querySelector('.copy-icon');
+if (copyIcon) {
+    copyIcon.closest('.title')?.addEventListener('click', () => {
+        if (obsLinkInput && obsLinkInput.value && !obsLinkInput.disabled) {
+            navigator.clipboard.writeText(obsLinkInput.value).then(() => {
+                const titleEl = copyIcon.closest('.title');
+                if (titleEl) {
+                    const originalText = titleEl.innerHTML;
+                    titleEl.innerHTML = '<span>Скопировано!</span>';
+                    setTimeout(() => {
+                        titleEl.innerHTML = originalText;
+                    }, 1500);
+                }
+            });
+        }
     });
 }
