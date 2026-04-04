@@ -236,15 +236,35 @@ if (copyIcon) {
     copyIcon.closest('.title')?.addEventListener('click', () => {
         if (obsLinkInput && obsLinkInput.value && !obsLinkInput.disabled) {
             navigator.clipboard.writeText(obsLinkInput.value).then(() => {
-                const titleEl = copyIcon.closest('.title');
-                if (titleEl) {
-                    const originalText = titleEl.innerHTML;
-                    titleEl.innerHTML = '<span>Скопировано!</span>';
-                    setTimeout(() => {
-                        titleEl.innerHTML = originalText;
-                    }, 1500);
-                }
+                showCopiedFeedback();
             });
         }
     });
+}
+
+// Клик по полю obs-link — выделение текста и копирование
+if (obsLinkInput) {
+    obsLinkInput.addEventListener('click', () => {
+        if (obsLinkInput.value && !obsLinkInput.disabled) {
+            obsLinkInput.select();
+            navigator.clipboard.writeText(obsLinkInput.value).then(() => {
+                showCopiedFeedback();
+            });
+        }
+    });
+}
+
+function showCopiedFeedback() {
+    const titleEl = copyIcon?.closest('.title');
+    if (titleEl) {
+        const spanEl = titleEl.querySelector('span');
+        if (spanEl) {
+            const originalText = spanEl.dataset.originalText || spanEl.textContent;
+            spanEl.dataset.originalText = originalText;
+            spanEl.textContent = 'Скопировано!';
+            setTimeout(() => {
+                spanEl.textContent = originalText;
+            }, 1500);
+        }
+    }
 }
