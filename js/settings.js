@@ -20,6 +20,7 @@ function generateObsLink() {
     const params = new URLSearchParams();
 
     params.set('channel', channelInput.value.trim());
+    params.set('obs-overlay', '1');
 
     if (restartInput && restartInput.value) {
         params.set('restart_time', restartInput.value.trim());
