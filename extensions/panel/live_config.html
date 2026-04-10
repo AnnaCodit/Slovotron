@@ -123,6 +123,42 @@
     <!-- Twitch Extensions Helper -->
     <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
 
+    <!-- Мок для локального тестирования.
+         ВАЖНО: хелпер выше уже определяет window.Twitch, поэтому мок нужен ПОСЛЕ него.
+         Удалить этот блок перед загрузкой в Twitch Developer Console. -->
+    <script>
+    (function () {
+        var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (!isLocal) return;
+
+        var mockSet = function (seg, ver, content) {
+            console.log('[MOCK] broadcaster config → viewers:', JSON.parse(content));
+            if (seg === 'broadcaster') {
+                localStorage.setItem('slovotron_ext_state', content);
+            }
+        };
+
+        window.Twitch = {
+            ext: {
+                onAuthorized: function (cb) {
+                    // Небольшая задержка — имитирует асинхронность Twitch
+                    setTimeout(function () { cb({ channelId: '0', token: '' }); }, 200);
+                },
+                onVisibilityChanged: function () {},
+                listen: function (_target, _cb) {
+                    // Локально слова идут через localStorage-мост, не PubSub
+                },
+                configuration: {
+                    broadcaster: null,
+                    onChanged: function () {},
+                    set: mockSet
+                }
+            }
+        };
+        console.log('[MOCK] Twitch.ext активирован (localhost)');
+    })();
+    </script>
+
     <!-- Общие модули игры -->
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>

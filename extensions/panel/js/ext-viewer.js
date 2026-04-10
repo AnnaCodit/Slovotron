@@ -4,6 +4,12 @@
 
 let currentChallengeId = null;
 let inputDisabled = false;
+let viewerToken = null;
+
+// URL EBS — заменить после деплоя; пустая строка отключает EBS в продакшне
+const EBS_URL = '';
+
+const _isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 // ─── Цвет по дистанции (тот же алгоритм, что в ws.js) ─────────────────────
 
@@ -186,6 +192,26 @@ async function submitWord() {
         } else {
             showViewerResult(word, result.distance);
             input.value = '';
+            // Передаём слово в live_config для учёта в статистике
+            if (_isLocal) {
+                // Локальное тестирование — localStorage-мост между вкладками
+                try {
+                    localStorage.setItem('slovotron_panel_word', JSON.stringify({
+                        word,
+                        timestamp: Date.now()
+                    }));
+                } catch (_) {}
+            } else if (EBS_URL && viewerToken) {
+                // Продакшн — через EBS → Twitch PubSub → live_config
+                fetch(EBS_URL + '/word', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + viewerToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ word })
+                }).catch(e => console.warn('[ext-viewer] EBS error:', e));
+            }
         }
     } catch (e) {
         console.error('[ext-viewer] Ошибка запроса:', e);
@@ -197,8 +223,9 @@ async function submitWord() {
 
 // ─── Инициализация через Twitch.ext ───────────────────────────────────────
 
-window.Twitch.ext.onAuthorized(() => {
+window.Twitch.ext.onAuthorized((auth) => {
     console.log('[ext-viewer] Авторизован');
+    viewerToken = auth.token;
     applyGameState(readBroadcasterConfig());
 });
 

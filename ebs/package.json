@@ -1,0 +1,14 @@
+{
+  "name": "slovotron-ebs",
+  "version": "1.0.0",
+  "description": "Extension Backend Service for Словотрон 9000",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
