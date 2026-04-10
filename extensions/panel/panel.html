@@ -14,116 +14,70 @@
             <span class="logo">🧠 СЛОВОТРОН</span>
             <nav>
                 <ul>
-                    <li id="menu-timer"></li>
-                    <li id="menu-button-restart" class="restart">
-                        <span title="Рестарт">🔄</span>
-                    </li>
-                    <li id="menu-button-tip" class="tip">
-                        <span title="Подсказка">💡</span>
-                    </li>
-                    <li id="menu-button-leaderboard" class="leaderboard">
-                        <span title="Лидерборд">🏆</span>
-                    </li>
-                    <!-- Скрытые элементы, необходимые ws.js и leaderboard.js -->
-                    <li id="menu-button-info" style="display:none"></li>
-                    <li id="menu-button-settings" style="display:none"></li>
+                    <li id="menu-button-leaderboard" class="leaderboard" title="Таблица лидеров">🏆</li>
                 </ul>
             </nav>
         </header>
 
-        <section id="tip-progress" class="content-box">
-            <div class="bar">
-                <div class="label">!подсказка</div>
-                <div class="bulb">💡</div>
-                <div id="tip-progress-fill"></div>
-                <div class="count">
-                    <div id="tip-count-current">0</div>
-                    <div class="sep">/</div>
-                    <div id="tip-count-total">0</div>
-                </div>
+        <!-- Статус игры -->
+        <div id="game-status" class="game-status-normal">⏳ Ожидание стримера...</div>
+
+        <!-- Форма ввода слова -->
+        <div id="word-form">
+            <input
+                id="word-input"
+                type="text"
+                placeholder="Введи слово..."
+                maxlength="20"
+                autocomplete="off"
+                spellcheck="false"
+                autocorrect="off"
+                autocapitalize="off"
+            >
+            <button id="word-submit" title="Проверить">→</button>
+        </div>
+
+        <!-- Личный результат зрителя -->
+        <div id="viewer-result" style="display:none">
+            <span id="viewer-last-word"></span>
+            <span id="viewer-last-distance"></span>
+        </div>
+
+        <!-- Глобальный топ-3 от канала -->
+        <section id="global-top3">
+            <div class="section-title">Топ-3 слова канала:</div>
+            <div id="top3-list">
+                <div class="top3-empty">Слов пока нет</div>
             </div>
         </section>
 
-        <section id="leaderboard-statistic" style="display: none;">
-            <div id="leaderboard">
-                <div class="title">🏆 Топ Победителей</div>
-                <div class="list"></div>
-                <div class="controls">
-                    <button id="reset-leaderboard-btn" class="reset-btn">Сбросить таблицу</button>
-                </div>
-            </div>
-            <div id="statistic">
-                <div class="title">Статистика за раунд:</div>
-                <div class="container">
-                    <div>Участников:</div>
-                    <div id="uniq-users">0</div>
-                </div>
-                <div class="container">
-                    <div>Слов:</div>
-                    <div id="uniq-words">0</div>
-                </div>
-                <div class="container">
-                    <div>Повторов:</div>
-                    <div id="repeated-words">0</div>
-                </div>
-                <div class="container">
-                    <div>Время:</div>
-                    <div id="round-time">0</div>
-                </div>
-            </div>
+        <!-- Победитель раунда -->
+        <section id="winner-panel" style="display:none">
+            <div class="winner-emoji">🏆</div>
+            <div class="winner-label">Победитель раунда:</div>
+            <div class="winner-name"></div>
         </section>
 
-        <section id="winner" style="display: none;">
-            <div class="winner-decorations">
-                <span class="emoji-decor decor-crown">👑</span>
-                <span class="emoji-decor decor-trophy">🏆</span>
-                <span class="emoji-decor decor-star-1">⭐</span>
-                <span class="emoji-decor decor-star-2">✨</span>
-                <span class="emoji-decor decor-party">🎉</span>
+        <!-- Таблица лидеров (скрыта по умолчанию) -->
+        <section id="leaderboard-panel" style="display:none">
+            <div class="section-title">🏆 Топ Победителей</div>
+            <div id="leaderboard-list">
+                <div class="top3-empty">Пока нет победителей</div>
             </div>
-            <div class="title">Победитель: </div>
-            <div class="content">
-                <div class="winner-avatar-wrapper">
-                    <img alt="" id="winner-avatar">
-                </div>
-                <div class="winner-name"></div>
+            <div class="leaderboard-controls">
+                <button id="reset-leaderboard-btn" class="reset-btn">Сбросить</button>
             </div>
-        </section>
-
-        <section class="restart-timer" style="display: none;">
-            <span>Перезапуск через: </span>
-            <span id="restart-timer-value">0</span>
-        </section>
-
-        <section class="guessing">
-            <div class="last-words"></div>
-            <div class="best-match"></div>
         </section>
     </div>
 
-    <!-- Скрытые служебные элементы, необходимые ws.js / leaderboard.js -->
-    <span id="test-win-btn" style="display:none"></span>
-    <span id="remove-test-user-from-leaderboard" style="display:none"></span>
-
-    <!-- Twitch Extensions Helper (обязателен для onAuthorized, configuration и др.) -->
+    <!-- Twitch Extensions Helper -->
     <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
-    <!-- TMI.js — подключение к чату Twitch -->
-    <script src="js/libs/tmi-v1.8.5.min.js"></script>
-    <!-- Конфетти на победу -->
-    <script src="js/libs/tsparticles.confetti.bundle-v3.9.1.min.js"></script>
-
-    <!-- Общие модули игры (без изменений) -->
-    <script src="js/config.js"></script>
+    <!-- Contextno API (kontekstno_query) -->
     <script src="js/api.js"></script>
-    <script src="js/easter_eggs.js"></script>
-    <script src="js/ws.js"></script>
-    <script src="js/leaderboard.js"></script>
-    <script src="js/tips.js"></script>
-    <script src="js/confetti.js"></script>
-
-    <!-- Модули расширения (заменяют settings.js и init.js) -->
-    <script src="js/ext-settings.js"></script>
-    <script src="js/ext-init.js"></script>
+    <!-- Viewer логика -->
+    <script src="js/ext-viewer.js"></script>
+    <!-- Таблица лидеров (localStorage) -->
+    <script src="js/ext-panel-leaderboard.js"></script>
 </body>
 
 </html>
