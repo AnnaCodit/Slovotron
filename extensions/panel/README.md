@@ -12,75 +12,96 @@
 
 ## Структура файлов
 
+В репозитории хранится только extension-специфичный код. Всё остальное — build-артефакты,
+генерируемые скриптом `build:extension` из корневых директорий.
+
 ```
 extensions/panel/
-├── live_config.html      # Панель стримера
-├── panel.html            # Панель зрителей
-├── config.html           # Страница настроек
+├── live_config.html
+├── panel.html
+├── config.html
+│
 ├── css/
-├── audio/
-├── img/
-└── js/
-    ├── ext-live-config.js    # Логика панели стримера
-    ├── ext-viewer.js         # Логика панели зрителей
-    ├── ext-config.js         # Логика страницы настроек
-    ├── ext-settings.js       # Чтение настроек из Twitch.ext.configuration
-    ├── ext-init.js           # Инициализация с Twitch-авторизацией
-    ├── ext-panel-leaderboard.js  # Таблица лидеров на стороне зрителя
-    │
-    │   # Файлы ниже — build-артефакты, не редактировать вручную:
-    ├── config.js             # ← копируется из ../../js/
-    ├── api.js                # ← копируется из ../../js/
-    ├── ws.js                 # ← копируется из ../../js/
-    ├── tips.js               # ← копируется из ../../js/
-    ├── leaderboard.js        # ← копируется из ../../js/
-    ├── confetti.js           # ← копируется из ../../js/
-    └── easter_eggs.js        # ← копируется из ../../js/
+│   ├── ext-live-config.css   # Переопределения для панели стримера (шрифт, отступы, broadcast-статус)
+│   ├── panel.css             # Стили панели зрителя (318px)
+│   │
+│   │   # Build-артефакты — не редактировать, копируются из корневого css/:
+│   ├── reset.css             # ← из css/
+│   ├── style.css             # ← из css/
+│   ├── leaderboard.css       # ← из css/
+│   └── tips.css              # ← из css/
+│
+├── js/
+│   ├── ext-live-config.js    # Логика панели стримера
+│   ├── ext-viewer.js         # Логика панели зрителей
+│   ├── ext-config.js         # Логика страницы настроек
+│   ├── ext-settings.js       # Чтение настроек из Twitch.ext.configuration
+│   ├── ext-init.js           # Инициализация с Twitch-авторизацией
+│   ├── ext-panel-leaderboard.js  # Таблица лидеров на стороне зрителя
+│   │
+│   │   # Build-артефакты — не редактировать, копируются из корневого js/:
+│   ├── config.js, api.js, ws.js, tips.js
+│   ├── leaderboard.js, confetti.js, easter_eggs.js
+│   └── libs/                 # Внешние библиотеки (tmi, tsparticles)
+│
+├── img/                      # ← build-артефакт, копируется из корневого img/
+└── audio/                    # ← build-артефакт, копируется из корневого audio/
 ```
 
-Shared-файлы (`config.js`, `api.js` и др.) — это копии из корневого `js/`.
-Источник истины — корневой `js/`, редактировать только там.
+> Редактировать только `ext-*.js`, `ext-live-config.css` и `panel.css`.
+> Всё остальное — источник истины в корне репозитория.
 
 ---
 
 ## Сборка перед запуском
 
-Shared JS-файлы не хранятся в репозитории. После клонирования нужно их сгенерировать:
+После клонирования репозитория нужно сгенерировать build-артефакты:
 
 ```bash
 npm run build:extension
 ```
 
-Скрипт копирует shared-файлы из корневого `js/` в `extensions/panel/js/`.
+Скрипт копирует в `extensions/panel/` следующее:
+- `js/` — 7 shared JS модулей игры
+- `css/` — reset.css, style.css, leaderboard.css, tips.css
+- `img/` — картинки (easter eggs и др.)
+- `audio/` — звуковые эффекты
 
-> Запускать также после каждого изменения в корневом `js/`, если хочешь проверить расширение.
+> Запускать после каждого изменения в корневых `js/`, `css/`, `img/`, `audio/`,
+> если хочешь проверить расширение.
 
 ---
 
 ## Локальная разработка
 
-Открыть нужную страницу напрямую в браузере:
+Запустить HTTP-сервер из директории `extensions/panel/` (нужен localhost для работы localStorage между вкладками):
 
-- **Панель стримера:** `extensions/panel/live_config.html`
-- **Панель зрителя:** `extensions/panel/panel.html`
-- **Настройки:** `extensions/panel/config.html`
+```bash
+cd extensions/panel
+python -m http.server 8080
+```
 
-В файлах есть встроенный mock для `Twitch.ext` — расширение работает без подключения к Twitch.
+Открыть в браузере:
+
+- **Панель стримера:** http://localhost:8080/live_config.html
+- **Панель зрителя:** http://localhost:8080/panel.html
+- **Настройки:** http://localhost:8080/config.html
+
+Для теста двух панелей одновременно открой обе вкладки — они общаются через `localStorage`.
+Моки `Twitch.ext` активируются автоматически на `localhost`.
 
 ---
 
 ## Деплой на Twitch
 
-1. Собрать shared-файлы:
+1. Собрать все файлы:
    ```bash
    npm run build:extension
    ```
 
-2. Проверить, что все файлы на месте:
+2. Проверить, что всё на месте:
    ```bash
    npm run verify:extension
    ```
 
-3. Упаковать всю директорию `extensions/panel/` в zip-архив.
-
-3. Загрузить архив в [Twitch Developer Console](https://dev.twitch.tv/console/extensions).
+3. Упаковать директорию `extensions/panel/` в zip-архив и загрузить в [Twitch Developer Console](https://dev.twitch.tv/console/extensions).
