@@ -1,0 +1,9 @@
+# Эти файлы генерируются скриптом build:extension из корневого js/
+# Не редактировать вручную — изменения будут перезаписаны
+config.js
+api.js
+easter_eggs.js
+tips.js
+ws.js
+confetti.js
+leaderboard.js
