@@ -8,7 +8,6 @@
 
 ## Скриншоты
 
-<!-- Добавьте скриншоты игры сюда -->
 ![Геймплей](img/screenshots/gameplay.png)
 ![Победа](img/screenshots/win.png)
 ![Настройки](img/screenshots/settings.png)
