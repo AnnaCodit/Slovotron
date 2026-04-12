@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build:extension": "node scripts/build-extension.js",
+    "verify:extension": "node scripts/verify-extension.js"
+  }
+}

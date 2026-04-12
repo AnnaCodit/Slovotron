@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Словотрон 9000 — Стример</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/leaderboard.css">
+    <link rel="stylesheet" href="css/tips.css">
+    <link rel="stylesheet" href="css/ext-live-config.css">
+    <!-- TMI для подключения к чату -->
+    <script src="js/libs/tmi-v1.8.5.min.js"></script>
+    <!-- Конфетти на победу -->
+    <script src="js/libs/tsparticles.confetti.bundle-v3.9.1.min.js"></script>
+</head>
+
+<body>
+    <div class="page-width">
+        <header class="main">
+            <div class="logo">
+                <span class="icon">🧠</span>
+                <span class="text">СЛОВОТРОН</span>
+                <span class="level">9000</span>
+            </div>
+            <nav>
+                <ul>
+                    <li id="menu-timer"></li>
+                    <li id="menu-button-restart" class="restart">
+                        <span title="Рестарт">🔄</span>
+                    </li>
+                    <li id="menu-button-tip" class="tip">
+                        <span title="Подсказка">💡</span>
+                    </li>
+                    <li id="menu-button-leaderboard" class="leaderboard">
+                        <span title="Лидерборд">🏆</span>
+                    </li>
+                    <li id="menu-button-info" style="display:none"></li>
+                    <li id="menu-button-settings" style="display:none"></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Статус: зрители получают данные через Twitch config -->
+        <div class="broadcast-status">
+            <span id="broadcast-indicator">📡 Передача зрителям: </span>
+            <span id="broadcast-viewers-count">активна</span>
+        </div>
+
+        <section id="tip-progress" class="content-box">
+            <div class="bar">
+                <div class="label">!подсказка</div>
+                <div class="bulb">💡</div>
+                <div id="tip-progress-fill"></div>
+                <div class="count">
+                    <div id="tip-count-current">0</div>
+                    <div class="sep">/</div>
+                    <div id="tip-count-total">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="leaderboard-statistic" style="display: none;">
+            <div id="leaderboard">
+                <div class="title">🏆 Топ Победителей</div>
+                <div class="list"></div>
+                <div class="controls">
+                    <button id="reset-leaderboard-btn" class="reset-btn">Сбросить таблицу</button>
+                </div>
+            </div>
+            <div id="statistic">
+                <div class="title">Статистика за раунд:</div>
+                <div class="container">
+                    <div>Участников:</div>
+                    <div id="uniq-users">0</div>
+                </div>
+                <div class="container">
+                    <div>Слов:</div>
+                    <div id="uniq-words">0</div>
+                </div>
+                <div class="container">
+                    <div>Повторов:</div>
+                    <div id="repeated-words">0</div>
+                </div>
+                <div class="container">
+                    <div>Время:</div>
+                    <div id="round-time">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="winner" style="display: none;">
+            <div class="winner-decorations">
+                <span class="emoji-decor decor-crown">👑</span>
+                <span class="emoji-decor decor-trophy">🏆</span>
+                <span class="emoji-decor decor-star-1">⭐</span>
+                <span class="emoji-decor decor-star-2">✨</span>
+                <span class="emoji-decor decor-party">🎉</span>
+            </div>
+            <div class="title">Победитель: </div>
+            <div class="content">
+                <div class="winner-avatar-wrapper">
+                    <img alt="" id="winner-avatar">
+                </div>
+                <div class="winner-name"></div>
+            </div>
+        </section>
+
+        <section class="restart-timer" style="display: none;">
+            <span>Перезапуск через: </span>
+            <span id="restart-timer-value">0</span>
+        </section>
+
+        <section class="guessing">
+            <div class="last-words"></div>
+            <div class="best-match"></div>
+        </section>
+    </div>
+
+    <!-- Скрытые служебные элементы -->
+    <span id="test-win-btn" style="display:none"></span>
+    <span id="remove-test-user-from-leaderboard" style="display:none"></span>
+    <section id="info" style="display:none"></section>
+    <section id="settings" style="display:none"></section>
+
+    <!-- Twitch Extensions Helper -->
+    <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+
+    <!-- Мок для локального тестирования.
+         ВАЖНО: хелпер выше уже определяет window.Twitch, поэтому мок нужен ПОСЛЕ него.
+         Удалить этот блок перед загрузкой в Twitch Developer Console. -->
+    <script>
+    (function () {
+        var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (!isLocal) return;
+
+        var mockSet = function (seg, ver, content) {
+            console.log('[MOCK] broadcaster config → viewers:', JSON.parse(content));
+            if (seg === 'broadcaster') {
+                localStorage.setItem('slovotron_ext_state', content);
+            }
+        };
+
+        window.Twitch = {
+            ext: {
+                onAuthorized: function (cb) {
+                    // Небольшая задержка — имитирует асинхронность Twitch
+                    setTimeout(function () { cb({ channelId: '0', token: '' }); }, 200);
+                },
+                onVisibilityChanged: function () {},
+                listen: function (_target, _cb) {
+                    // Локально слова идут через localStorage-мост, не PubSub
+                },
+                configuration: {
+                    broadcaster: null,
+                    onChanged: function () {},
+                    set: mockSet
+                }
+            }
+        };
+        console.log('[MOCK] Twitch.ext активирован (localhost)');
+    })();
+    </script>
+
+    <!-- Общие модули игры -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/easter_eggs.js"></script>
+    <script src="js/ws.js"></script>
+    <script src="js/leaderboard.js"></script>
+    <script src="js/tips.js"></script>
+    <script src="js/confetti.js"></script>
+
+    <!-- Модули расширения для live config -->
+    <script src="js/ext-settings.js"></script>
+    <script src="js/ext-live-config.js"></script>
+</body>
+
+</html>

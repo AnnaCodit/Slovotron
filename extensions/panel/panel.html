@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Словотрон 9000</title>
+    <link rel="stylesheet" href="css/panel.css">
+</head>
+
+<body>
+    <div class="page-width">
+        <header class="main">
+            <span class="logo">🧠 СЛОВОТРОН</span>
+            <nav>
+                <ul>
+                    <li id="menu-button-leaderboard" class="leaderboard" title="Таблица лидеров">🏆</li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Статус игры -->
+        <div id="game-status" class="game-status-normal">⏳ Ожидание стримера...</div>
+
+        <!-- Форма ввода слова -->
+        <div id="word-form">
+            <input
+                id="word-input"
+                type="text"
+                placeholder="Введи слово..."
+                maxlength="20"
+                autocomplete="off"
+                spellcheck="false"
+                autocorrect="off"
+                autocapitalize="off"
+            >
+            <button id="word-submit" title="Проверить">→</button>
+        </div>
+
+        <!-- Личный результат зрителя -->
+        <div id="viewer-result" style="display:none">
+            <span id="viewer-last-word"></span>
+            <span id="viewer-last-distance"></span>
+        </div>
+
+        <!-- Глобальный топ-3 от канала -->
+        <section id="global-top3">
+            <div class="section-title">Топ-3 слова канала:</div>
+            <div id="top3-list">
+                <div class="top3-empty">Слов пока нет</div>
+            </div>
+        </section>
+
+        <!-- Победитель раунда -->
+        <section id="winner-panel" style="display:none">
+            <div class="winner-emoji">🏆</div>
+            <div class="winner-label">Победитель раунда:</div>
+            <div class="winner-name"></div>
+        </section>
+
+        <!-- Таблица лидеров (скрыта по умолчанию) -->
+        <section id="leaderboard-panel" style="display:none">
+            <div class="section-title">🏆 Топ Победителей</div>
+            <div id="leaderboard-list">
+                <div class="top3-empty">Пока нет победителей</div>
+            </div>
+            <div class="leaderboard-controls">
+                <button id="reset-leaderboard-btn" class="reset-btn">Сбросить</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Twitch Extensions Helper -->
+    <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+
+    <!-- Мок для локального тестирования.
+         Удалить этот блок перед загрузкой в Twitch Developer Console. -->
+    <script>
+    (function () {
+        var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (!isLocal) return;
+
+        var _onChangedCb = null;
+
+        // Слушаем обновления от live_config.html через localStorage
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'slovotron_ext_state' && _onChangedCb) {
+                _onChangedCb();
+            }
+        });
+
+        window.Twitch = {
+            ext: {
+                onAuthorized: function (cb) {
+                    setTimeout(function () { cb({ channelId: '0', token: '' }); }, 100);
+                },
+                configuration: {
+                    // Геттер — всегда читает свежие данные из localStorage
+                    get broadcaster() {
+                        var raw = localStorage.getItem('slovotron_ext_state');
+                        return raw ? { content: raw } : null;
+                    },
+                    onChanged: function (cb) { _onChangedCb = cb; }
+                }
+            }
+        };
+        console.log('[MOCK] Twitch.ext активирован (localhost) — localStorage bridge');
+    })();
+    </script>
+
+    <!-- Contextno API (kontekstno_query) -->
+    <script src="js/api.js"></script>
+    <!-- Viewer логика -->
+    <script src="js/ext-viewer.js"></script>
+    <!-- Таблица лидеров (localStorage) -->
+    <script src="js/ext-panel-leaderboard.js"></script>
+</body>
+
+</html>

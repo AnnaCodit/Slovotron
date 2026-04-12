@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Словотрон 9000 — Настройки</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #1a1a1a;
+            color: #e8e8e8;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            padding: 24px 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        h1 span { color: #9147ff; }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 9px 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #9147ff;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #9147ff;
+            cursor: pointer;
+        }
+
+        .checkbox-row label {
+            margin: 0;
+            cursor: pointer;
+            color: #e8e8e8;
+            font-size: 14px;
+        }
+
+        .hint {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .separator {
+            border: none;
+            border-top: 1px solid #333;
+            margin: 20px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 11px 16px;
+            background-color: #9147ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+
+        button:hover { background-color: #7c3ae0; }
+        button:disabled { opacity: 0.5; cursor: default; }
+    </style>
+</head>
+
+<body>
+    <h1>🧠 Словотрон <span>9000</span></h1>
+
+    <div class="field">
+        <label for="channel-name">Имя канала на Twitch</label>
+        <input type="text" id="channel-name" placeholder="fra3a" autocomplete="off" spellcheck="false">
+        <p class="hint">
+            Обычно определяется автоматически. Заполните только если канал не определился.
+        </p>
+    </div>
+
+    <hr class="separator">
+
+    <div class="field">
+        <label for="restart-time">Перезапуск после победы (секунды)</label>
+        <input type="number" id="restart-time" value="20" min="0" max="300">
+    </div>
+
+    <div class="checkbox-row">
+        <input type="checkbox" id="win-avatar-enable">
+        <label for="win-avatar-enable">Показывать аватарку победителя</label>
+    </div>
+
+    <div class="checkbox-row">
+        <input type="checkbox" id="sound-enable" checked>
+        <label for="sound-enable">Включить звук</label>
+    </div>
+
+    <button id="save-btn">Сохранить</button>
+
+    <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+    <script src="js/ext-config.js"></script>
+</body>
+
+</html>
