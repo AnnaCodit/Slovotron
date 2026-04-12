@@ -27,6 +27,7 @@
 </head>
 
 <body>
+    <div id="custom-background"></div>
     <div class="page-width">
         <header class="main">
             <a href="/" class="logo" title="Словотрон">
@@ -109,6 +110,22 @@
                 <div class="save-buttton-wrapper">
                     <div class="setting">
                         <button id="save-settings-btn" disabled>Сохранить</button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-settings-box">
+                <div class="setting">
+                    <div class="title">Фоновое изображение</div>
+                    <div class="bg-file-row">
+                        <label class="bg-file-label" for="bg-file-input">Выбрать файл</label>
+                        <input type="file" id="bg-file-input" accept="image/*">
+                        <span id="bg-file-name">Файл не выбран</span>
+                        <button id="bg-clear-btn" style="display: none">Удалить</button>
+                    </div>
+                    <div id="bg-opacity-section">
+                        <span>Прозрачность:</span>
+                        <input type="range" id="bg-opacity-slider" min="0" max="100" value="100">
+                        <span id="bg-opacity-value">100%</span>
                     </div>
                 </div>
             </div>
@@ -196,6 +213,7 @@
     <script src="js/easter_eggs.js?v=__ASSETS_VERSION__"></script>
     <script src="js/ws.js?v=__ASSETS_VERSION__"></script>
     <script src="js/settings.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/background.js?v=__ASSETS_VERSION__"></script>
     <script src="js/leaderboard.js?v=__ASSETS_VERSION__"></script>
     <script src="js/tips.js?v=__ASSETS_VERSION__"></script>
     <script src="js/init.js?v=__ASSETS_VERSION__"></script>

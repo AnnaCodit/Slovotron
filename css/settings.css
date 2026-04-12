@@ -116,6 +116,91 @@
     margin-top: 2px;
 }
 
+#settings .bg-settings-box {
+    background-color: #222;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 0 auto 40px;
+}
+
+#settings .bg-file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.bg-file-label {
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 5px;
+    background-color: #055c05;
+    color: #FFF;
+    font-size: 16px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.bg-file-label:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+#bg-file-input {
+    display: none;
+}
+
+#bg-file-name {
+    color: #aaa;
+    font-size: 16px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#bg-clear-btn {
+    background-color: #5c0505;
+    padding: 10px 16px;
+    font-size: 16px;
+    width: auto;
+}
+
+#bg-opacity-section {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+}
+
+#settings .setting input[type="range"] {
+    flex: 1;
+    width: auto;
+    max-width: none;
+    padding: 0;
+    background: transparent;
+    border: none;
+    accent-color: #055c05;
+    cursor: pointer;
+}
+
+#bg-opacity-value {
+    min-width: 42px;
+    text-align: right;
+    color: #aaa;
+    font-size: 16px;
+}
+
+body.has-custom-bg #settings .main-settings-box,
+body.has-custom-bg #settings .obs-link-box,
+body.has-custom-bg #settings .bg-settings-box {
+    background-color: rgba(34, 34, 34, 0.82);
+}
+
 #settings .avatar-container {
     position: relative;
     display: flex;

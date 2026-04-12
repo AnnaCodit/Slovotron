@@ -327,6 +327,32 @@ input[type="submit"]:disabled {
     }
 }
 
+/* custom background */
+
+body.has-custom-bg {
+    background-color: transparent;
+}
+
+body.has-custom-bg .guessing .msg .msg-content {
+    background-color: rgba(16, 16, 24, 0.78);
+}
+
+body.has-custom-bg #info {
+    background-color: rgba(34, 34, 34, 0.82);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+#custom-background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
 /* error overlay */
 
 .error-overlay {

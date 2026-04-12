@@ -68,6 +68,10 @@
     display: none;
 }
 
+body.has-custom-bg #tip-progress .bar {
+    background-color: rgba(16, 16, 24, 0.78);
+}
+
 .tip-activated {
     animation: tip-trigger 0.8s ease-out forwards;
 }
