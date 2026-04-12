@@ -2,8 +2,10 @@ const BG_DB_NAME = 'slovotron-bg';
 const BG_STORE_NAME = 'images';
 const BG_KEY = 'custom-bg';
 const BG_OPACITY_KEY = 'bg_opacity';
+const BG_MAX_SIZE = 10 * 1024 * 1024; // 10 МБ
 
 let bgObjectUrl = null;
+let bgDB = null;
 
 const bgEl = document.getElementById('custom-background');
 const bgFileInput = document.getElementById('bg-file-input');
@@ -14,10 +16,11 @@ const bgOpacityValue = document.getElementById('bg-opacity-value');
 const bgFileName = document.getElementById('bg-file-name');
 
 function openBgDB() {
+    if (bgDB) return Promise.resolve(bgDB);
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(BG_DB_NAME, 1);
         req.onupgradeneeded = (e) => e.target.result.createObjectStore(BG_STORE_NAME);
-        req.onsuccess = (e) => resolve(e.target.result);
+        req.onsuccess = (e) => { bgDB = e.target.result; resolve(bgDB); };
         req.onerror = (e) => reject(e.target.error);
     });
 }
@@ -88,7 +91,7 @@ async function initBackground() {
         if (!blob) return;
 
         bgObjectUrl = URL.createObjectURL(blob);
-        const opacity = parseInt(localStorage.getItem(BG_OPACITY_KEY) ?? '100', 10);
+        const opacity = parseInt(localStorage.getItem(BG_OPACITY_KEY), 10) || 100;
         applyBgToDOM(bgObjectUrl, opacity);
         showBgOpacityControls(opacity);
         if (bgFileName) bgFileName.textContent = 'Изображение загружено';
@@ -101,11 +104,21 @@ if (bgFileInput) {
     bgFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            alert('Пожалуйста, выберите изображение.');
+            bgFileInput.value = '';
+            return;
+        }
+        if (file.size > BG_MAX_SIZE) {
+            alert(`Файл слишком большой. Максимальный размер — ${BG_MAX_SIZE / 1024 / 1024} МБ.`);
+            bgFileInput.value = '';
+            return;
+        }
         try {
             await saveBgBlob(file);
             if (bgObjectUrl) URL.revokeObjectURL(bgObjectUrl);
             bgObjectUrl = URL.createObjectURL(file);
-            const opacity = parseInt(localStorage.getItem(BG_OPACITY_KEY) ?? '100', 10);
+            const opacity = parseInt(localStorage.getItem(BG_OPACITY_KEY), 10) || 100;
             applyBgToDOM(bgObjectUrl, opacity);
             showBgOpacityControls(opacity);
             if (bgFileName) bgFileName.textContent = file.name;
