@@ -1,5 +1,5 @@
 const { existsSync, readFileSync } = require('fs');
-const { join, dirname } = require('path');
+const { join } = require('path');
 
 const PANEL_DIR = join(__dirname, '../extensions/panel');
 const HTML_FILES = ['live_config.html', 'panel.html', 'config.html'];
@@ -15,7 +15,7 @@ for (const htmlFile of HTML_FILES) {
   }
 
   const content = readFileSync(htmlPath, 'utf8');
-  const srcMatches = [...content.matchAll(/src="([^"]+)"/g)];
+  const srcMatches = [...content.matchAll(/(?:src|href)="([^"]+)"/g)];
   const localScripts = srcMatches
     .map(m => m[1])
     .filter(src => !src.startsWith('http'));
