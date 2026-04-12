@@ -104,6 +104,16 @@
     line-height: 1.7;
 }
 
+body.has-custom-bg #leaderboard,
+body.has-custom-bg #statistic {
+    background-color: rgba(34, 34, 34, 0.82);
+}
+
+body.has-custom-bg #winner {
+    background: radial-gradient(circle at top, rgba(255, 215, 0, 0.15), rgba(34, 34, 34, 0.82) 60%),
+                rgba(34, 34, 34, 0.82);
+}
+
 .reset-btn {
     background-color: #333;
     font-size: 14px;
