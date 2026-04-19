@@ -35,6 +35,26 @@ async function kontekstno_query({
     return await response.json();
 }
 
+async function sendWebhookEvent(event = '', data = {}) {
+    if (!webhook_url || !event) return;
+
+    try {
+        await fetch(webhook_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                channel: channel_name,
+                event: event,
+                data: data
+            })
+        });
+    } catch (error) {
+        console.warn(`Не удалось отправить webhook событие "${event}"`, error);
+    }
+}
+
 async function generate_secret_word() {
     let room_id;
     let is_bugged = true;
@@ -63,6 +83,22 @@ async function generate_secret_word() {
                 console.warn(`Слово ID ${room_id} забаговано (дистанция для "банан" = 0). Попытка ${retry_count + 1}/${max_retries}...`);
                 retry_count++;
             } else {
+                let secret_word = null;
+                try {
+                    const secretWordResponse = await kontekstno_query({
+                        method: 'tip',
+                        challenge_id: room_id,
+                        last_word_rank: 1
+                    });
+                    secret_word = secretWordResponse.word || null;
+                } catch (secretWordError) {
+                    console.warn('Не удалось получить секретное слово через tip(last_word_rank=1):', secretWordError);
+                }
+
+                current_secret_word_data = {
+                    challenge_id: room_id,
+                    secret_word: secret_word
+                };
                 is_bugged = false;
             }
         } catch (e) {

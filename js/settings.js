@@ -34,6 +34,18 @@ function generateObsLink() {
         params.set('sound_enable', soundInput.checked ? '1' : '0');
     }
 
+    if (webhook_url) {
+        params.set('webhook_url', webhook_url);
+    }
+
+    if (overlay_idle_timeout > 0) {
+        params.set('inactive_timeout', overlay_idle_timeout);
+    }
+
+    if (overlay_idle_opacity >= 0 && overlay_idle_opacity < 1) {
+        params.set('inactive_opacity', overlay_idle_opacity);
+    }
+
     if (obsLinkInput) {
         obsLinkInput.value = baseUrl + '?' + params.toString();
         obsLinkInput.disabled = false;
@@ -79,6 +91,23 @@ function loadSettings() {
     if (urlParams.has('obs-overlay')) {
         document.body.classList.add('obs-overlay');
     }
+
+    webhook_url = (urlParams.get('webhook_url') || '').trim();
+
+    const idleTimeoutParam = urlParams.get('inactive_timeout') || urlParams.get('inactivity_timeout');
+    if (idleTimeoutParam !== null) {
+        const parsedTimeout = Number.parseFloat(idleTimeoutParam);
+        overlay_idle_timeout = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 0;
+    }
+
+    const idleOpacityParam = urlParams.get('inactive_opacity');
+    if (idleOpacityParam !== null) {
+        const parsedOpacity = Number.parseFloat(idleOpacityParam);
+        if (Number.isFinite(parsedOpacity)) {
+            overlay_idle_opacity = Math.min(1, Math.max(0, parsedOpacity));
+        }
+    }
+    document.body.style.setProperty('--overlay-idle-opacity', overlay_idle_opacity);
 
     const urlChannel = urlParams.get('channel_name') || urlParams.get('channel');
     if (urlChannel) {

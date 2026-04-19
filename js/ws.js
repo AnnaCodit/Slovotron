@@ -2,6 +2,24 @@ const last_words_container = document.querySelector('.guessing .last-words');
 const best_match_container = document.querySelector('.guessing .best-match');
 
 const emit = (name, data) => document.dispatchEvent(new CustomEvent(name, { detail: data }));
+const isObsOverlayMode = () => document.body.classList.contains('obs-overlay') || document.body.classList.contains('theme-obs-overlay');
+
+function setOverlayIdleState(isIdle) {
+    if (!isObsOverlayMode() || overlay_idle_timeout <= 0) return;
+    is_overlay_idle = isIdle;
+    document.body.classList.toggle('overlay-words-idle', isIdle);
+}
+
+function markOverlayActivity() {
+    if (!isObsOverlayMode() || overlay_idle_timeout <= 0) return;
+    setOverlayIdleState(false);
+    if (overlay_idle_timeout_id) {
+        clearTimeout(overlay_idle_timeout_id);
+    }
+    overlay_idle_timeout_id = setTimeout(() => {
+        setOverlayIdleState(true);
+    }, overlay_idle_timeout * 1000);
+}
 
 function addAnythingToLastWords(html) {
     last_words_container.insertAdjacentHTML('afterbegin', html);
@@ -70,6 +88,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
 
     // Если слова нет — выполняем логику
     console.log(`Новое слово: ${word}. Обрабатываю...`);
+    markOverlayActivity();
 
     if (force_win) {
         word_check = { distance: 1 };
@@ -113,7 +132,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
 
     // обработка победы (слово угадано)
     if (word_check.distance == 1) {
-        handle_win(user);
+        handle_win(user, word);
     }
 
 }
@@ -175,7 +194,7 @@ function message_template(word, distance, name, nickname_color) {
     `;
 }
 
-function handle_win(winner_user) {
+function handle_win(winner_user, winning_word = '') {
 
     is_game_finished = true;
     winTime = Date.now();
@@ -199,6 +218,18 @@ function handle_win(winner_user) {
     const winnerBlock = document.getElementById('winner');
     winnerBlock.querySelector('.winner-name').innerText = winner_user['display-name'];
     winnerBlock.style.display = 'block';
+
+    sendWebhookEvent('game-win', {
+        winner: {
+            login: winner_user.username || '',
+            display_name: winner_user['display-name'] || winner_user.username || ''
+        },
+        winning_word: winning_word,
+        attempts_used: checked_words.size,
+        unique_words: uniqWords,
+        repeated_words: repeatWords,
+        round_duration_sec: roundStartTime ? Math.floor((Date.now() - roundStartTime) / 1000) : null
+    });
 
     const resetTimeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
     let confettiTimeout = Date.now() + (restart_time - 5) * 1000;
@@ -236,6 +267,10 @@ async function resetRoundTimeout(time) {
     resetRoundTimeoutId = setTimeout(async () => {
         try {
             secret_word_id = await generate_secret_word();
+            sendWebhookEvent('game-new', {
+                challenge_id: secret_word_id,
+                secret_word: current_secret_word_data?.secret_word || null
+            });
         } catch (e) {
             console.error(e);
         }
@@ -260,6 +295,7 @@ function reset_round() {
     uniqWords = repeatWords = 0;
     reset_tips();
     best_found_distance = kontekstno_api_tips_max_distance;
+    markOverlayActivity();
 }
 
 document.getElementById('test-win-btn').addEventListener('click', () => {

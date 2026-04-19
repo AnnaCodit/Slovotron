@@ -3,6 +3,8 @@ let channel_name = '';
 let restart_time = 20;
 let win_avatar_enable = false;
 let sound_enable = true;
+let webhook_url = '';
+let current_secret_word_data = null;
 
 // Состояние игры
 let secret_word_id = '';
@@ -24,6 +26,10 @@ let uniqUsers = new Set();
 const checked_words = new Map();
 let wordQueue = [];
 let tmi_client = null;
+let overlay_idle_timeout = 0;
+let overlay_idle_opacity = 1;
+let overlay_idle_timeout_id = null;
+let is_overlay_idle = false;
 
 // DOM элементы (кешируются тут или в месте использования)
 // Эти переменные лучше не объявлять тут, так как DOM еще не загружен на 100% при старте config.js

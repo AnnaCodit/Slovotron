@@ -99,8 +99,15 @@ async function use_tip(user = '', force = false) {
     const new_message = message_template(tip_word.word, tip_word.distance, '💡 Подсказка', '#DDD');
     addAnythingToLastWords(new_message);
     addMatchWord(new_message, tip_word.distance);
+
+    sendWebhookEvent('game-tip', {
+        tip_word: tip_word.word,
+        tip_distance: tip_word.distance,
+        challenge_id: secret_word_id
+    });
+
     if (tip_word.distance == 1) {
-        handle_win({ username: 'podskazka', 'display-name': '💡 Подсказка' });
+        handle_win({ username: 'podskazka', 'display-name': '💡 Подсказка' }, tip_word.word);
     }
 
     // await process_message(wordQueue[0].user, '#DDD', tip_word)

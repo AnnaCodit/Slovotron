@@ -480,3 +480,17 @@ input[type="submit"]:disabled {
 .obs-overlay #leaderboard .title {
     margin-bottom: 10px;
 }
+
+.obs-overlay .guessing .last-words,
+.obs-overlay .guessing .best-match,
+.theme-obs-overlay .guessing .last-words,
+.theme-obs-overlay .guessing .best-match {
+    transition: opacity 0.6s ease;
+}
+
+.obs-overlay.overlay-words-idle .guessing .last-words,
+.obs-overlay.overlay-words-idle .guessing .best-match,
+.theme-obs-overlay.overlay-words-idle .guessing .last-words,
+.theme-obs-overlay.overlay-words-idle .guessing .best-match {
+    opacity: var(--overlay-idle-opacity, 0.35);
+}
