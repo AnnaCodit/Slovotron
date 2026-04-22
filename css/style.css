@@ -330,7 +330,7 @@ input[type="submit"]:disabled {
 /* custom background */
 
 body.has-custom-bg {
-    background-color: transparent;
+    
 }
 
 body.has-custom-bg .guessing .msg .msg-content {
