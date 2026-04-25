@@ -26,8 +26,8 @@ let uniqUsers = new Set();
 const checked_words = new Map();
 let wordQueue = [];
 let tmi_client = null;
-let overlay_idle_timeout = 5;
-let overlay_idle_opacity = 0.5;
+let overlay_idle_timeout = 6;
+let overlay_idle_opacity = 0.75;
 let overlay_idle_timeout_id = null;
 let is_overlay_idle = false;
 
