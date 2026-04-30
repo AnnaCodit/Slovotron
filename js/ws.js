@@ -2,7 +2,7 @@ const last_words_container = document.querySelector('.guessing .last-words');
 const best_match_container = document.querySelector('.guessing .best-match');
 
 const emit = (name, data) => document.dispatchEvent(new CustomEvent(name, { detail: data }));
-const isObsOverlayMode = () => document.body.classList.contains('obs-overlay') || document.body.classList.contains('theme-obs-overlay');
+const isObsOverlayMode = () => document.body.classList.contains('obs-overlay');
 
 function setOverlayIdleState(isIdle) {
     if (!isObsOverlayMode() || overlay_idle_timeout <= 0) return;

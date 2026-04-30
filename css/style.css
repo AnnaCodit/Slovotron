@@ -380,49 +380,6 @@ body.has-custom-bg #info {
     margin-bottom: 20px;
 }
 
-/* app theme - obs-overlay */
-.theme-obs-overlay nav,
-.theme-obs-overlay #info,
-.theme-obs-overlay footer.main,
-.theme-obs-overlay footer.tech-things {
-    display: none;
-}
-
-.theme-obs-overlay header.main {
-    padding-top: 7px;
-    padding-bottom: 15px;
-}
-
-.theme-obs-overlay section {
-    margin-bottom: 30px;
-}
-
-.theme-obs-overlay #winner .title {
-    display: none;
-}
-
-/* hide 4 and 5 elements */
-.theme-obs-overlay #leaderboard .list *:nth-child(n+4) {
-    display: none;
-}
-
-/* remove border from 3 elements */
-.theme-obs-overlay #leaderboard .list *:nth-child(3) {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.theme-obs-overlay #statistic,
-.theme-obs-overlay #leaderboard {
-    padding-top: 15px;
-    padding-bottom: 15px;
-}
-
-.theme-obs-overlay #statistic .title,
-.theme-obs-overlay #leaderboard .title {
-    margin-bottom: 10px;
-}
-
 /* временный фикс для обс и Квантума */
 @media all and (max-width: 800px) {
 
@@ -506,15 +463,11 @@ body.has-custom-bg #info {
 }
 
 .obs-overlay .guessing .last-words,
-.obs-overlay .guessing .best-match,
-.theme-obs-overlay .guessing .last-words,
-.theme-obs-overlay .guessing .best-match {
+.obs-overlay .guessing .best-match {
     transition: opacity 0.6s ease;
 }
 
 .obs-overlay.overlay-words-idle .guessing .last-words,
-.obs-overlay.overlay-words-idle .guessing .best-match,
-.theme-obs-overlay.overlay-words-idle .guessing .last-words,
-.theme-obs-overlay.overlay-words-idle .guessing .best-match {
+.obs-overlay.overlay-words-idle .guessing .best-match {
     opacity: var(--overlay-idle-opacity, 0.35);
 }
