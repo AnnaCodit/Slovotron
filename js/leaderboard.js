@@ -24,7 +24,7 @@ function updateLeaderboard(winnerName) {
 
 function renderLeaderboard() {
     const data = getLeaderboardData();
-    listContainer = document.querySelector('#leaderboard .list');
+    const listContainer = document.querySelector('#leaderboard .list');
     if (!listContainer) return;
 
     listContainer.innerHTML = '';
@@ -35,30 +35,40 @@ function renderLeaderboard() {
         .slice(0, 5); // Take top 5
 
     if (sortedWinners.length === 0) {
-        listContainer.innerHTML = '<div style="text-align: center; color: #777;">Пока нет победителей</div>';
+        listContainer.innerHTML =
+            '<div style="text-align:center;color:#777;">Пока нет победителей</div>';
         return;
     }
 
-    sortedWinners.forEach((item, index) => {
-        const name = item[0];
-        const wins = item[1];
+    const medals = ['🥇', '🥈', '🥉'];
+
+    let medalLevel = 0;
+    let previousWins = null;
+
+    sortedWinners.forEach(([name, wins]) => {
+        if (previousWins !== null && wins !== previousWins) {
+            medalLevel++;
+        }
+
+        previousWins = wins;
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'leaderboard-item';
 
-        const rankDiv = document.createElement('div');
-        rankDiv.className = 'rank';
-        rankDiv.textContent = `#${index + 1}`;
-        itemDiv.appendChild(rankDiv);
-
         const nameDiv = document.createElement('div');
         nameDiv.className = 'name';
-        nameDiv.textContent = name; // Safe assignment
-        itemDiv.appendChild(nameDiv);
+        nameDiv.textContent = name;
 
         const scoreDiv = document.createElement('div');
         scoreDiv.className = 'score';
-        scoreDiv.textContent = `${wins} 🏆`;
+
+        const medal = medals[medalLevel] || '';
+
+        scoreDiv.textContent = medal
+            ? `${wins} ${medal}`
+            : `${wins}`;
+
+        itemDiv.appendChild(nameDiv);
         itemDiv.appendChild(scoreDiv);
 
         listContainer.appendChild(itemDiv);
