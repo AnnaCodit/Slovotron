@@ -122,7 +122,7 @@ async function sendWebhookEvent(event = '', data = {}) {
 //   score(gameId, word)   -> { distance }   (distance falsy => not in vocabulary)
 //   tip(gameId, lastRank) -> { word, distance }   (optional; null if unsupported)
 
-const WORDGUN_BASE_URL = 'https://api.wordgun.ru/v1';
+const WORDGUN_BASE_URL = 'https://api.wordgun.ru';
 
 async function wordgun_request(path, { method = 'GET', body = null } = {}) {
     const controller = new AbortController();
@@ -225,9 +225,11 @@ const GAME_BACKENDS = {
         }
     },
 
-    // wordgun.ru — stateless API (see public-api-v1.md). The game lives inside an
+    // wordgun.ru — stateless API (see public-api-v2.md). The game lives inside an
     // opaque token; a guess returns { in_vocab, rank }. The secret word is never
     // disclosed, but a hint endpoint reveals a word closer than your best rank.
+    // v2 adds model & difficulty selection and a WebSocket guess channel; guesses
+    // fall back to the v1 HTTP endpoint, which accepts v2 tokens unchanged.
     wordgun: {
         id: 'wordgun',
         label: 'wordgun.ru',
@@ -235,19 +237,50 @@ const GAME_BACKENDS = {
         maxDistance: Infinity,
 
         async createGame() {
-            const data = await wordgun_request('/games', { method: 'POST' });
+            // Both fields are optional: an empty model means the server default,
+            // an empty difficulty means the secret is drawn from the whole vocabulary.
+            const body = {};
+            if (wordgun_model) body.model = wordgun_model;
+            if (wordgun_difficulty) body.difficulty = wordgun_difficulty;
+
+            const data = await wordgun_request('/v2/create_game', { method: 'POST', body });
             if (!data?.token) {
                 throw new Error('Wordgun API не вернул токен игры');
             }
+
+            // One game per socket — retarget the guess channel at the new token and
+            // warm it up, so the first chat word does not pay the connection latency
+            // (nor the open timeout when WebSockets turn out to be unreachable).
+            wordgun_ws_set_game(data.token);
+            if (wordgun_ws_available(data.token)) {
+                wordgun_ws_ensure_open().catch(() => {});
+            }
+
             // Wordgun never reveals the secret word, so it stays null.
             return { gameId: data.token, secretWord: null };
         },
 
         async score(gameId, word) {
-            const result = await wordgun_request('/guess', {
-                method: 'POST',
-                body: { token: gameId, word: word }
-            });
+            let result = null;
+
+            if (wordgun_ws_available(gameId)) {
+                try {
+                    result = await wordgun_ws_guess(gameId, word);
+                } catch (error) {
+                    // A rejection from the server itself (bad or expired token) would
+                    // fail over HTTP too — only the transport is worth retrying.
+                    if (error.wordgun_rejected) throw error;
+                    console.warn('Wordgun WebSocket недоступен, отправляю через HTTP:', error);
+                }
+            }
+
+            if (!result) {
+                result = await wordgun_request('/v1/guess', {
+                    method: 'POST',
+                    body: { token: gameId, word: word }
+                });
+            }
+
             // Normalize to the shared { distance } shape: rank is the distance,
             // an out-of-vocabulary guess has no distance.
             return { distance: result.in_vocab ? result.rank : undefined };
@@ -259,12 +292,27 @@ const GAME_BACKENDS = {
             // we have a finite best, so the server returns a far first hint.
             const body = { token: gameId };
             if (Number.isFinite(bestRank)) body.best_rank = bestRank;
-            const result = await wordgun_request('/hint', { method: 'POST', body });
+            const result = await wordgun_request('/v2/hint', { method: 'POST', body });
             // { word: null } means no closer word remains.
             return { word: result?.word ?? null, distance: result?.rank };
         }
     }
 };
+
+// The models and difficulties available on the server, fetched once and cached.
+let wordgun_models_cache = null;
+
+async function wordgun_list_models() {
+    if (wordgun_models_cache) return wordgun_models_cache;
+
+    const data = await wordgun_request('/v2/list_model');
+    wordgun_models_cache = {
+        models: Array.isArray(data?.models) ? data.models : [],
+        defaultModel: data?.default || '',
+        difficulties: Array.isArray(data?.difficulties) ? data.difficulties : []
+    };
+    return wordgun_models_cache;
+}
 
 function getActiveBackend() {
     return GAME_BACKENDS[game_backend] || GAME_BACKENDS.kontekstno;
@@ -295,6 +343,8 @@ async function get_tip(gameId, lastRank) {
 
 async function generate_secret_word() {
     const backend = getActiveBackend();
+    // Release the wordgun guess socket whenever another backend takes over.
+    if (backend.id !== 'wordgun') wordgun_ws_close();
     let retry_count = 0;
     const max_retries = 5;
 
