@@ -6,7 +6,7 @@ let sound_enable = true;
 let webhook_url = '';
 let webhook_secret = '';
 let game_backend = 'kontekstno'; // active word-guessing backend: 'kontekstno' | 'wordgun'
-let wordgun_model = ''; // wordgun v2 model; empty = server default
+const wordgun_model = 'ru-context-v1'; // wordgun v2 model; not user-configurable
 let wordgun_difficulty = ''; // wordgun v2 difficulty; empty = whole vocabulary
 let current_secret_word_data = null;
 

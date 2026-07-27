@@ -6,7 +6,6 @@ const saveBtn = document.getElementById('save-settings-btn');
 const obsLinkInput = document.getElementById('obs-link');
 const gameBackendInput = document.getElementById('game-backend');
 const backendWarning = document.getElementById('backend-warning');
-const wordgunModelInput = document.getElementById('wordgun-model');
 const wordgunDifficultyInput = document.getElementById('wordgun-difficulty');
 const wordgunSettingBlocks = document.querySelectorAll('.wordgun-setting');
 let validationTimeout;
@@ -51,15 +50,10 @@ function generateObsLink() {
     if (gameBackendInput) {
         params.set('backend', gameBackendInput.value);
 
-        // wordgun v2 model/difficulty: only meaningful for that backend, and an
-        // empty value already means "server default" / "whole vocabulary".
-        if (gameBackendInput.value === 'wordgun') {
-            if (wordgunModelInput && wordgunModelInput.value) {
-                params.set('wg_model', wordgunModelInput.value);
-            }
-            if (wordgunDifficultyInput && wordgunDifficultyInput.value) {
-                params.set('wg_difficulty', wordgunDifficultyInput.value);
-            }
+        // wordgun v2 difficulty: only meaningful for that backend, and an empty
+        // value already means "the whole vocabulary".
+        if (gameBackendInput.value === 'wordgun' && wordgunDifficultyInput && wordgunDifficultyInput.value) {
+            params.set('wg_difficulty', wordgunDifficultyInput.value);
         }
     }
 
@@ -177,11 +171,9 @@ function loadSettings() {
     }
     if (gameBackendInput) gameBackendInput.value = game_backend;
 
-    wordgun_model = (getSettingValue(urlParams, 'wg_model', 'wordgun_model') || '').trim();
     wordgun_difficulty = (getSettingValue(urlParams, 'wg_difficulty', 'wordgun_difficulty') || '').trim();
-    // Show the stored values right away; the real option lists arrive from
+    // Show the stored value right away; the real option list arrives from
     // GET /v2/list_model only once the settings panel is actually opened.
-    ensureSelectOption(wordgunModelInput, wordgun_model);
     ensureSelectOption(wordgunDifficultyInput, wordgun_difficulty);
 
     updateBackendSettings();
@@ -213,11 +205,6 @@ if (saveBtn) {
         if (gameBackendInput && GAME_BACKENDS[gameBackendInput.value]) {
             game_backend = gameBackendInput.value;
             localStorage.setItem('game_backend', game_backend);
-        }
-
-        if (wordgunModelInput) {
-            wordgun_model = wordgunModelInput.value;
-            localStorage.setItem('wordgun_model', wordgun_model);
         }
 
         if (wordgunDifficultyInput) {
@@ -363,22 +350,18 @@ function fillSelectOptions(select, values, current, emptyLabel) {
     select.value = current || '';
 }
 
-// Pull the models and difficulties from GET /v2/list_model. Called lazily so the
-// OBS overlay — which reads everything from the URL — never hits the endpoint.
+// Pull the difficulties from GET /v2/list_model. Called lazily so the OBS overlay
+// — which reads everything from the URL — never hits the endpoint.
 async function loadWordgunOptions() {
-    if (wordgunOptionsLoaded || !wordgunModelInput || !wordgunDifficultyInput) return;
+    if (wordgunOptionsLoaded || !wordgunDifficultyInput) return;
 
     try {
         const info = await wordgun_list_models();
         wordgunOptionsLoaded = true;
-
-        const defaultLabel = info.defaultModel ? `По умолчанию (${info.defaultModel})` : 'По умолчанию';
-        fillSelectOptions(wordgunModelInput, info.models, wordgun_model, defaultLabel);
         fillSelectOptions(wordgunDifficultyInput, info.difficulties, wordgun_difficulty, 'Без ограничения');
     } catch (error) {
-        // A failed lookup must not wipe the saved settings, so keep what we have.
-        console.warn('Не удалось загрузить список моделей wordgun:', error);
-        ensureSelectOption(wordgunModelInput, wordgun_model);
+        // A failed lookup must not wipe the saved setting, so keep what we have.
+        console.warn('Не удалось загрузить список сложностей wordgun:', error);
         ensureSelectOption(wordgunDifficultyInput, wordgun_difficulty);
     }
 }
@@ -392,9 +375,9 @@ if (gameBackendInput) {
     });
 }
 
-[wordgunModelInput, wordgunDifficultyInput].forEach((select) => {
-    if (select) select.addEventListener("change", generateObsLink);
-});
+if (wordgunDifficultyInput) {
+    wordgunDifficultyInput.addEventListener("change", generateObsLink);
+}
 
 // Копирование ссылки для OBS при клике на иконку
 const copyIcon = document.querySelector('.copy-icon');
