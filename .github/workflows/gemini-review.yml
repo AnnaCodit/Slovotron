@@ -6,6 +6,7 @@ on:
 
 jobs:
   review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,5 +20,5 @@ jobs:
         uses: sshnaidm/gemini-code-review-action@v2
         with:
           gemini-key: ${{ secrets.GEMINI_API_KEY }}
-          model: "gemini-3.5-flash" # не факт что хватит лимитов, потестим, зависит от того сколько тратит 1 PR
+          model: "gemini-3.6-flash" # не факт что хватит лимитов, потестим, зависит от того сколько тратит 1 PR
           # model: "gemini-3.1-flash-lite" # дофига лимитов но туповата
