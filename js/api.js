@@ -61,7 +61,7 @@ async function kontekstno_query({
                 if (errorText.length > 200) {
                     errorText = errorText.substring(0, 200) + '...';
                 }
-            } catch {}
+            } catch { }
             throw new Error(
                 `HTTP ${response.status} ${response.statusText} ${errorText}`
             );
@@ -141,10 +141,11 @@ async function wordgun_request(path, { method = 'GET', body = null } = {}) {
 
         if (!response.ok) {
             let errorBody = null;
-            try { errorBody = await response.json(); } catch {}
+            try { errorBody = await response.json(); } catch { }
             const error = new Error(`Wordgun HTTP ${response.status}: ${errorBody?.error || response.statusText}`);
             error.status = response.status;
             error.code = errorBody?.code;
+            error.apiMessage = errorBody?.error;
             throw error;
         }
 
@@ -243,7 +244,24 @@ const GAME_BACKENDS = {
             if (wordgun_model) body.model = wordgun_model;
             if (wordgun_difficulty) body.difficulty = wordgun_difficulty;
 
-            const data = await wordgun_request('/v2/create_game', { method: 'POST', body });
+            let data;
+
+            try {
+                data = await wordgun_request('/v2/create_game', { method: 'POST', body });
+            } catch (error) {
+                const isUnknownDifficulty = error.status === 400
+                    && typeof error.apiMessage === 'string'
+                    && error.apiMessage.startsWith('unknown difficulty');
+
+                if (body.difficulty && isUnknownDifficulty) {
+                    error.userMessage = 'Выбранная сложность Wordgun больше не поддерживается. '
+                        + 'Откройте настройки и выберите новую сложность. '
+                        + 'Если используете OBS, замените ссылку браузерного источника.';
+                }
+
+                throw error;
+            }
+
             if (!data?.token) {
                 throw new Error('Wordgun API не вернул токен игры');
             }
@@ -332,6 +350,13 @@ async function generate_secret_word() {
             return game.gameId;
         } catch (e) {
             console.warn(`Не удалось создать игру (${backend.id}). Попытка ${retry_count + 1}/${max_retries}:`, e);
+
+            // Ошибки настроек не исправятся повторным запросом.
+            if (e.userMessage) {
+                show_fullscreen_error(e.userMessage);
+                throw e;
+            }
+
             retry_count++;
             // Небольшая пауза перед повтором при сетевой ошибке
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -352,10 +377,16 @@ function show_fullscreen_error(message) {
             <div class="error-content">
                 <div class="error-icon">⚠️</div>
                 <div class="error-message">${message}</div>
+                <button type="button" class="error-close-btn">Закрыть</button>
             </div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', error_html);
+
+    const errorOverlay = document.querySelector('.error-overlay');
+    errorOverlay?.querySelector('.error-close-btn')?.addEventListener('click', () => {
+        errorOverlay.remove();
+    });
 }
 
 async function getTwitchUserData(username) {

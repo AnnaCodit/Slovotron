@@ -171,9 +171,14 @@ function loadSettings() {
     }
     if (gameBackendInput) gameBackendInput.value = game_backend;
 
-    wordgun_difficulty = (getSettingValue(urlParams, 'wg_difficulty', 'wordgun_difficulty') || '').trim();
-    // Show the stored value right away; the real option list arrives from
-    // GET /v2/list_model only once the settings panel is actually opened.
+    // если ранее в obs был сохранен wg_difficulty, а затем ссылка была обновлена так, что этот параметр отсутствует, то ставим дефолтное значение, а не используем сохраненное
+    let storedWordgunDifficulty = localStorage.getItem('wordgun_difficulty') || '';
+    if (urlParams.get('backend') === 'wordgun') {
+        storedWordgunDifficulty = urlParams.get('wg_difficulty') || '';
+    }
+    wordgun_difficulty = storedWordgunDifficulty.trim();
+
+    // Show the stored value right away; the real option list arrives from GET /v2/list_model only once the settings panel is actually opened.
     ensureSelectOption(wordgunDifficultyInput, wordgun_difficulty);
 
     updateBackendSettings();
