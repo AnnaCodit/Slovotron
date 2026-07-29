@@ -61,7 +61,7 @@ async function kontekstno_query({
                 if (errorText.length > 200) {
                     errorText = errorText.substring(0, 200) + '...';
                 }
-            } catch {}
+            } catch { }
             throw new Error(
                 `HTTP ${response.status} ${response.statusText} ${errorText}`
             );
@@ -122,7 +122,7 @@ async function sendWebhookEvent(event = '', data = {}) {
 //   score(gameId, word)   -> { distance }   (distance falsy => not in vocabulary)
 //   tip(gameId, lastRank) -> { word, distance }   (optional; null if unsupported)
 
-const WORDGUN_BASE_URL = 'https://api.wordgun.ru/v1';
+const WORDGUN_BASE_URL = 'https://api.wordgun.ru';
 
 async function wordgun_request(path, { method = 'GET', body = null } = {}) {
     const controller = new AbortController();
@@ -141,10 +141,11 @@ async function wordgun_request(path, { method = 'GET', body = null } = {}) {
 
         if (!response.ok) {
             let errorBody = null;
-            try { errorBody = await response.json(); } catch {}
+            try { errorBody = await response.json(); } catch { }
             const error = new Error(`Wordgun HTTP ${response.status}: ${errorBody?.error || response.statusText}`);
             error.status = response.status;
             error.code = errorBody?.code;
+            error.apiMessage = errorBody?.error;
             throw error;
         }
 
@@ -225,9 +226,11 @@ const GAME_BACKENDS = {
         }
     },
 
-    // wordgun.ru — stateless API (see public-api-v1.md). The game lives inside an
+    // wordgun.ru — stateless API (see public-api-v2.md). The game lives inside an
     // opaque token; a guess returns { in_vocab, rank }. The secret word is never
     // disclosed, but a hint endpoint reveals a word closer than your best rank.
+    // The game is created on v2 to pick a model and difficulty; guesses go to the
+    // v1 endpoint, which accepts v2 tokens unchanged.
     wordgun: {
         id: 'wordgun',
         label: 'wordgun.ru',
@@ -235,16 +238,40 @@ const GAME_BACKENDS = {
         maxDistance: Infinity,
 
         async createGame() {
-            const data = await wordgun_request('/games', { method: 'POST' });
+            // Both fields are optional: an empty model means the server default,
+            // an empty difficulty means the secret is drawn from the whole vocabulary.
+            const body = {};
+            if (wordgun_model) body.model = wordgun_model;
+            if (wordgun_difficulty) body.difficulty = wordgun_difficulty;
+
+            let data;
+
+            try {
+                data = await wordgun_request('/v2/create_game', { method: 'POST', body });
+            } catch (error) {
+                const isUnknownDifficulty = error.status === 400
+                    && typeof error.apiMessage === 'string'
+                    && error.apiMessage.startsWith('unknown difficulty');
+
+                if (body.difficulty && isUnknownDifficulty) {
+                    error.userMessage = 'Выбранная сложность Wordgun больше не поддерживается. '
+                        + 'Откройте настройки и выберите новую сложность. '
+                        + 'Если используете OBS, замените ссылку браузерного источника.';
+                }
+
+                throw error;
+            }
+
             if (!data?.token) {
                 throw new Error('Wordgun API не вернул токен игры');
             }
+
             // Wordgun never reveals the secret word, so it stays null.
             return { gameId: data.token, secretWord: null };
         },
 
         async score(gameId, word) {
-            const result = await wordgun_request('/guess', {
+            const result = await wordgun_request('/v1/guess', {
                 method: 'POST',
                 body: { token: gameId, word: word }
             });
@@ -259,12 +286,27 @@ const GAME_BACKENDS = {
             // we have a finite best, so the server returns a far first hint.
             const body = { token: gameId };
             if (Number.isFinite(bestRank)) body.best_rank = bestRank;
-            const result = await wordgun_request('/hint', { method: 'POST', body });
+            const result = await wordgun_request('/v2/hint', { method: 'POST', body });
             // { word: null } means no closer word remains.
             return { word: result?.word ?? null, distance: result?.rank };
         }
     }
 };
+
+// The models and difficulties available on the server, fetched once and cached.
+let wordgun_models_cache = null;
+
+async function wordgun_list_models() {
+    if (wordgun_models_cache) return wordgun_models_cache;
+
+    const data = await wordgun_request('/v2/list_model');
+    wordgun_models_cache = {
+        models: Array.isArray(data?.models) ? data.models : [],
+        defaultModel: data?.default || '',
+        difficulties: Array.isArray(data?.difficulties) ? data.difficulties : []
+    };
+    return wordgun_models_cache;
+}
 
 function getActiveBackend() {
     return GAME_BACKENDS[game_backend] || GAME_BACKENDS.kontekstno;
@@ -308,6 +350,13 @@ async function generate_secret_word() {
             return game.gameId;
         } catch (e) {
             console.warn(`Не удалось создать игру (${backend.id}). Попытка ${retry_count + 1}/${max_retries}:`, e);
+
+            // Ошибки настроек не исправятся повторным запросом.
+            if (e.userMessage) {
+                show_fullscreen_error(e.userMessage);
+                throw e;
+            }
+
             retry_count++;
             // Небольшая пауза перед повтором при сетевой ошибке
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -328,10 +377,16 @@ function show_fullscreen_error(message) {
             <div class="error-content">
                 <div class="error-icon">⚠️</div>
                 <div class="error-message">${message}</div>
+                <button type="button" class="error-close-btn">Закрыть</button>
             </div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', error_html);
+
+    const errorOverlay = document.querySelector('.error-overlay');
+    errorOverlay?.querySelector('.error-close-btn')?.addEventListener('click', () => {
+        errorOverlay.remove();
+    });
 }
 
 async function getTwitchUserData(username) {

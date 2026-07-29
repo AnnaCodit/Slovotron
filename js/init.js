@@ -124,6 +124,7 @@ async function app() {
 
         } else {
             document.getElementById('settings').style.display = 'block';
+            if (game_backend === 'wordgun') loadWordgunOptions();
         }
 
     } catch (error) {

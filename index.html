@@ -87,18 +87,24 @@
                             <div class="title">Перезапуск игры после победы (секунды)</div>
                             <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
                         </div>
+                    </div>
+                    <div class="ui-col">
                         <div class="setting">
                             <div class="title">Источник слов (бэкенд)</div>
                             <select id="game-backend" name="game_backend">
                                 <option value="kontekstno">контекстно.рф</option>
                                 <option value="wordgun">wordgun.ru</option>
                             </select>
-                            <div id="backend-warning" class="backend-warning" style="display: none;">
-                                ⚠️ wordgun.ru может работать некорректно с российских IP-адресов. Если игра не запускается, используйте VPN или выберите контекстно.рф.
-                            </div>
+                            <div id="backend-warning" class="backend-warning" style="display: none;"> ⚠️ wordgun.ru
+                                может работать некорректно с российских IP-адресов. Если игра не запускается,
+                                используйте VPN или выберите контекстно.рф. </div>
                         </div>
-                    </div>
-                    <div class="ui-col">
+                        <div class="setting wordgun-setting" style="display: none;">
+                            <div class="title">Сложность</div>
+                            <select id="wordgun-difficulty" name="wordgun_difficulty">
+                                <option value=""></option>
+                            </select>
+                        </div>
                         <div class="setting checkbox-container">
                             <label class="title" for="win-avatar-enable">Показывать аватарку победителя?</label>
                             <div>

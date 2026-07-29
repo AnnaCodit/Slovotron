@@ -376,7 +376,7 @@ body.has-custom-bg #info {
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     padding: 20px;
     z-index: 9999;
     animation: fadeInOpacity 0.5s ease-in-out;
@@ -389,6 +389,16 @@ body.has-custom-bg #info {
 .error-overlay .error-icon {
     font-size: 5rem;
     margin-bottom: 20px;
+}
+
+.error-overlay .error-close-btn {
+    margin-top: 24px;
+    padding: 10px 24px;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 1rem;
+    cursor: pointer;
 }
 
 /* временный фикс для обс и Квантума */

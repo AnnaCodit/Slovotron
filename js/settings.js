@@ -6,7 +6,15 @@ const saveBtn = document.getElementById('save-settings-btn');
 const obsLinkInput = document.getElementById('obs-link');
 const gameBackendInput = document.getElementById('game-backend');
 const backendWarning = document.getElementById('backend-warning');
+const wordgunDifficultyInput = document.getElementById('wordgun-difficulty');
+const wordgunSettingBlocks = document.querySelectorAll('.wordgun-setting');
+const WORDGUN_DIFFICULTY_LABELS = {
+    medium: 'Обычная',
+    hard: 'Тяжелая',
+    hell: 'Ад'
+};
 let validationTimeout;
+let wordgunOptionsLoaded = false;
 
 function parseBooleanSetting(value) {
     return String(value).toLowerCase() === 'true' || String(value) === '1';
@@ -14,6 +22,10 @@ function parseBooleanSetting(value) {
 
 function getSettingValue(urlParams, paramName, storageName) {
     return urlParams.has(paramName) ? urlParams.get(paramName) : localStorage.getItem(storageName);
+}
+
+function getWordgunDifficultyLabel(value) {
+    return WORDGUN_DIFFICULTY_LABELS[value] || value;
 }
 
 function generateObsLink() {
@@ -46,6 +58,12 @@ function generateObsLink() {
 
     if (gameBackendInput) {
         params.set('backend', gameBackendInput.value);
+
+        // wordgun v2 difficulty: only meaningful for that backend, and an empty
+        // value already means "the whole vocabulary".
+        if (gameBackendInput.value === 'wordgun' && wordgunDifficultyInput && wordgunDifficultyInput.value) {
+            params.set('wg_difficulty', wordgunDifficultyInput.value);
+        }
     }
 
     if (webhook_url) {
@@ -161,7 +179,18 @@ function loadSettings() {
         game_backend = storedBackend;
     }
     if (gameBackendInput) gameBackendInput.value = game_backend;
-    updateBackendWarning();
+
+    // если ранее в obs был сохранен wg_difficulty, а затем ссылка была обновлена так, что этот параметр отсутствует, то ставим дефолтное значение, а не используем сохраненное
+    let storedWordgunDifficulty = localStorage.getItem('wordgun_difficulty') || '';
+    if (urlParams.get('backend') === 'wordgun') {
+        storedWordgunDifficulty = urlParams.get('wg_difficulty') || '';
+    }
+    wordgun_difficulty = storedWordgunDifficulty.trim();
+
+    // Show the stored value right away; the real option list arrives from GET /v2/list_model only once the settings panel is actually opened.
+    ensureSelectOption(wordgunDifficultyInput, wordgun_difficulty);
+
+    updateBackendSettings();
 
     // Генерируем ссылку OBS при загрузке страницы
     generateObsLink();
@@ -190,6 +219,11 @@ if (saveBtn) {
         if (gameBackendInput && GAME_BACKENDS[gameBackendInput.value]) {
             game_backend = gameBackendInput.value;
             localStorage.setItem('game_backend', game_backend);
+        }
+
+        if (wordgunDifficultyInput) {
+            wordgun_difficulty = wordgunDifficultyInput.value;
+            localStorage.setItem('wordgun_difficulty', wordgun_difficulty);
         }
 
         // Генерируем ссылку для OBS
@@ -275,7 +309,12 @@ if (restartInput) {
 
 document.getElementById('menu-button-settings').addEventListener('click', () => {
     const settingsSection = document.getElementById('settings');
-    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+    const willOpen = settingsSection.style.display === 'none';
+    settingsSection.style.display = willOpen ? 'block' : 'none';
+
+    if (willOpen && (gameBackendInput ? gameBackendInput.value : game_backend) === 'wordgun') {
+        loadWordgunOptions();
+    }
 });
 
 if (avatarInput) {
@@ -290,16 +329,68 @@ if (soundInput) {
     });
 }
 
-// Show a warning when the wordgun backend is selected (it can be region-blocked from some RU IPs).
-function updateBackendWarning() {
-    if (!backendWarning) return;
+// Show the wordgun-only settings and its warning (the API can be region-blocked
+// from some RU IPs) only while that backend is selected.
+function updateBackendSettings() {
     const selected = gameBackendInput ? gameBackendInput.value : game_backend;
-    backendWarning.style.display = selected === 'wordgun' ? 'block' : 'none';
+    const isWordgun = selected === 'wordgun';
+
+    if (backendWarning) {
+        backendWarning.style.display = isWordgun ? 'block' : 'none';
+    }
+
+    wordgunSettingBlocks.forEach((block) => {
+        block.style.display = isWordgun ? 'block' : 'none';
+    });
+}
+
+// Keep a stored value selectable even before (or without) the option list —
+// otherwise a saved model would silently reset to the default.
+function ensureSelectOption(select, value) {
+    if (!select || !value) return;
+    const exists = Array.from(select.options).some((option) => option.value === value);
+    if (!exists) select.add(new Option(getWordgunDifficultyLabel(value), value));
+    select.value = value;
+}
+
+function fillSelectOptions(select, values, current, emptyLabel) {
+    if (!select) return;
+    select.innerHTML = '';
+    select.add(new Option(emptyLabel, ''));
+    values.forEach((value) => select.add(new Option(getWordgunDifficultyLabel(value), value)));
+    if (current && !values.includes(current)) {
+        select.add(new Option(`${getWordgunDifficultyLabel(current)} (недоступно)`, current));
+    }
+    select.value = current || '';
+}
+
+// Pull the difficulties from GET /v2/list_model. Called lazily so the OBS overlay
+// — which reads everything from the URL — never hits the endpoint.
+async function loadWordgunOptions() {
+    if (wordgunOptionsLoaded || !wordgunDifficultyInput) return;
+
+    try {
+        const info = await wordgun_list_models();
+        wordgunOptionsLoaded = true;
+        fillSelectOptions(wordgunDifficultyInput, info.difficulties, wordgun_difficulty, 'Без ограничения');
+    } catch (error) {
+        // A failed lookup must not wipe the saved setting, so keep what we have.
+        console.warn('Не удалось загрузить список сложностей wordgun:', error);
+        ensureSelectOption(wordgunDifficultyInput, wordgun_difficulty);
+    }
 }
 
 if (gameBackendInput) {
     gameBackendInput.addEventListener("change", () => {
-        updateBackendWarning();
+        updateBackendSettings();
+        if (gameBackendInput.value === 'wordgun') loadWordgunOptions();
+        generateObsLink();
+        checkFormsValidity();
+    });
+}
+
+if (wordgunDifficultyInput) {
+    wordgunDifficultyInput.addEventListener("change", () => {
         generateObsLink();
         checkFormsValidity();
     });
