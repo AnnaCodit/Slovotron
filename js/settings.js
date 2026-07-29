@@ -8,6 +8,11 @@ const gameBackendInput = document.getElementById('game-backend');
 const backendWarning = document.getElementById('backend-warning');
 const wordgunDifficultyInput = document.getElementById('wordgun-difficulty');
 const wordgunSettingBlocks = document.querySelectorAll('.wordgun-setting');
+const WORDGUN_DIFFICULTY_LABELS = {
+    medium: 'Обычная',
+    hard: 'Тяжелая',
+    hell: 'Ад'
+};
 let validationTimeout;
 let wordgunOptionsLoaded = false;
 
@@ -17,6 +22,10 @@ function parseBooleanSetting(value) {
 
 function getSettingValue(urlParams, paramName, storageName) {
     return urlParams.has(paramName) ? urlParams.get(paramName) : localStorage.getItem(storageName);
+}
+
+function getWordgunDifficultyLabel(value) {
+    return WORDGUN_DIFFICULTY_LABELS[value] || value;
 }
 
 function generateObsLink() {
@@ -340,7 +349,7 @@ function updateBackendSettings() {
 function ensureSelectOption(select, value) {
     if (!select || !value) return;
     const exists = Array.from(select.options).some((option) => option.value === value);
-    if (!exists) select.add(new Option(value, value));
+    if (!exists) select.add(new Option(getWordgunDifficultyLabel(value), value));
     select.value = value;
 }
 
@@ -348,9 +357,9 @@ function fillSelectOptions(select, values, current, emptyLabel) {
     if (!select) return;
     select.innerHTML = '';
     select.add(new Option(emptyLabel, ''));
-    values.forEach((value) => select.add(new Option(value, value)));
+    values.forEach((value) => select.add(new Option(getWordgunDifficultyLabel(value), value)));
     if (current && !values.includes(current)) {
-        select.add(new Option(`${current} (недоступно)`, current));
+        select.add(new Option(`${getWordgunDifficultyLabel(current)} (недоступно)`, current));
     }
     select.value = current || '';
 }
