@@ -390,7 +390,10 @@ if (gameBackendInput) {
 }
 
 if (wordgunDifficultyInput) {
-    wordgunDifficultyInput.addEventListener("change", generateObsLink);
+    wordgunDifficultyInput.addEventListener("change", () => {
+        generateObsLink();
+        checkFormsValidity();
+    });
 }
 
 // Копирование ссылки для OBS при клике на иконку
