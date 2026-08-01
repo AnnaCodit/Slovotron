@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Словотрон 9000 — Соло</title>
+    <meta name="description" content="Соло-режим игры в ассоциативное угадывание слов без Twitch">
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/style.css?v=__ASSETS_VERSION__">
+    <link rel="stylesheet" href="css/settings.css?v=__ASSETS_VERSION__">
+    <link rel="stylesheet" href="css/leaderboard.css?v=__ASSETS_VERSION__">
+    <link rel="stylesheet" href="css/tips.css?v=__ASSETS_VERSION__">
+    <!-- Эффекты конфети -->
+    <script src="js/libs/tsparticles.confetti.bundle-v3.9.1.min.js"></script>
+    <style>
+        .solo-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: #1d1d1f;
+            border: 1px solid #333;
+            border-radius: 14px;
+            padding: 12px 16px;
+            width: 100%;
+            max-width: 620px;
+        }
+
+        .solo-box .badge {
+            font-size: 12px;
+            color: #aaa;
+            background: #2a2a2e;
+            border: 1px solid #3a3a3f;
+            border-radius: 999px;
+            padding: 4px 10px;
+            white-space: nowrap;
+        }
+
+        #solo-input {
+            flex: 1;
+            min-width: 180px;
+            background: #141416;
+            color: #FFF;
+            border: 1px solid #3a3a3f;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 18px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        #solo-input:focus {
+            border-color: #8A2BE2;
+        }
+
+        #solo-submit {
+            background: #8A2BE2;
+            color: #FFF;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: filter 0.2s ease;
+            font-family: inherit;
+        }
+
+        #solo-submit:hover {
+            filter: brightness(1.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="custom-background"></div>
+    <div class="page-width">
+        <header class="main">
+            <a href="/" class="logo" title="Словотрон">
+                <span class="icon">🧠</span>
+                <span class="text">СЛОВОТРОН</span>
+                <span class="level">9000</span>
+            </a>
+            <nav>
+                <ul>
+                    <li id="menu-timer"> 00 </li>
+                    <li id="menu-button-restart" class="restart">
+                        <span title="Рестарт">🔄</span>
+                    </li>
+                    <li id="menu-button-tip" class="tip">
+                        <span title="Получить подсказку">💡</span>
+                    </li>
+                    <li id="menu-button-info" class="info">
+                        <span title="Помощь">ℹ️</span>
+                    </li>
+                    <li id="menu-button-leaderboard" class="leaderboard">
+                        <span title="Лидерборд">🏆</span>
+                    </li>
+                    <li id="menu-button-settings" class="settings">
+                        <span title="Настройки">⚙️</span>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+        <section id="solo-controls">
+            <div class="solo-box">
+                <span class="badge">Соло-режим (без Twitch)</span>
+                <input type="text" id="solo-input" maxlength="30" placeholder="Введите слово..." autocomplete="off">
+                <button id="solo-submit">Угадать!</button>
+            </div>
+        </section>
+        <section id="info" class="content-box">
+            <div>Привет 👋 Слово уже загадано — пиши варианты в поле выше. Чем меньше цифра справа от слова - тем
+                ближе ты к отгадке! Кнопка 💡 выдаёт подсказку. Удачи <span id="test-win-btn">🎉</span></div>
+        </section>
+        <section id="tip-progress" class="content-box">
+            <div class="bar">
+                <div class="label">!подсказка</div>
+                <div class="bulb">💡</div>
+                <div id="tip-progress-fill"></div>
+                <div class="count">
+                    <div id="tip-count-current">0</div>
+                    <div class="sep">/</div>
+                    <div id="tip-count-total">0</div>
+                </div>
+            </div>
+        </section>
+        <section id="settings" class="content-box" style="display: none;">
+            <div class="main-settings-box">
+                <div class="ui-cols settings-items-wrapper">
+                    <div class="ui-col">
+                        <div class="setting">
+                            <div class="title">Имя канала на Twitch (не нужно для соло)</div>
+                            <div class="avatar-container">
+                                <input type="text" id="channel-name" name="channel_name" placeholder="fra3a">
+                                <img id="setting-avatar" class="avatar">
+                            </div>
+                        </div>
+                        <div class="setting">
+                            <div class="title">Перезапуск игры после победы (секунды)</div>
+                            <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
+                        </div>
+                    </div>
+                    <div class="ui-col">
+                        <div class="setting">
+                            <div class="title">Источник слов (бэкенд)</div>
+                            <select id="game-backend" name="game_backend">
+                                <option value="kontekstno">контекстно.рф</option>
+                                <option value="wordgun">wordgun.ru</option>
+                            </select>
+                            <div id="backend-warning" class="backend-warning" style="display: none;"> ⚠️ wordgun.ru
+                                может работать некорректно с российских IP-адресов. Если игра не запускается,
+                                используйте VPN или выберите контекстно.рф. </div>
+                        </div>
+                        <div class="setting wordgun-setting" style="display: none;">
+                            <div class="title">Сложность</div>
+                            <select id="wordgun-difficulty" name="wordgun_difficulty">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="setting checkbox-container">
+                            <label class="title" for="win-avatar-enable">Показывать аватарку победителя?</label>
+                            <div>
+                                <input type="checkbox" id="win-avatar-enable">
+                            </div>
+                        </div>
+                        <div class="setting checkbox-container">
+                            <label class="title" for="sound-enable">Включить звук?</label>
+                            <div>
+                                <input type="checkbox" id="sound-enable" checked>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="save-buttton-wrapper">
+                    <div class="setting">
+                        <button id="save-settings-btn" disabled>Сохранить</button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-settings-box">
+                <div class="setting">
+                    <div class="title">Фоновое изображение</div>
+                    <div class="bg-file-row">
+                        <label class="bg-file-label" for="bg-file-input">Выбрать файл</label>
+                        <input type="file" id="bg-file-input" accept="image/*">
+                        <span id="bg-file-name">Файл не выбран</span>
+                        <button id="bg-clear-btn" style="display: none">Удалить</button>
+                    </div>
+                    <div id="bg-opacity-section">
+                        <span>Прозрачность:</span>
+                        <input type="range" id="bg-opacity-slider" min="0" max="100" value="100">
+                        <span id="bg-opacity-value">100%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="obs-link-box">
+                <div class="setting">
+                    <div class="title">
+                        <span>Оверлей для OBS</span>
+                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                            <path fill="currentColor"
+                                d="M288 64C252.7 64 224 92.7 224 128L224 384C224 419.3 252.7 448 288 448L480 448C515.3 448 544 419.3 544 384L544 183.4C544 166 536.9 149.3 524.3 137.2L466.6 81.8C454.7 70.4 438.8 64 422.3 64L288 64zM160 192C124.7 192 96 224.7 96 256L96 512C96 547.3 124.7 576 160 576L352 576C387.3 576 416 547.3 416 512L416 496L352 496L352 512L160 512L160 256L176 256L176 192L160 192z" />
+                        </svg>
+                    </div>
+                    <div class="obs-link">
+                        <input type="text" id="obs-link" name="obs_link" placeholder="Сначала заполните название канала"
+                            disabled>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="leaderboard-statistic" style="display: none;">
+            <div id="leaderboard">
+                <div class="title">🏆 Топ Победителей</div>
+                <div class="list"></div>
+                <div class="controls">
+                    <button class="reset-leaderboard-btn reset-btn">Сбросить таблицу</button>
+                </div>
+            </div>
+            <div id="statistic">
+                <div class="title">Статистика за раунд:</div>
+                <div class="container">
+                    <div>Кол-во участников:</div>
+                    <div id="uniq-users">0</div>
+                </div>
+                <div class="container">
+                    <div>Уникальных слов:</div>
+                    <div id="uniq-words">0</div>
+                </div>
+                <div class="container">
+                    <div>Повторных слов:</div>
+                    <div id="repeated-words">0</div>
+                </div>
+                <div class="container">
+                    <div>Длительность раунда:</div>
+                    <div id="round-time">0</div>
+                </div>
+            </div>
+        </section>
+        <section id="winner" style="display: none;">
+            <div class="winner-decorations">
+                <span class="emoji-decor decor-crown">👑</span>
+                <span class="emoji-decor decor-trophy">🏆</span>
+                <span class="emoji-decor decor-star-1">⭐</span>
+                <span class="emoji-decor decor-star-2">✨</span>
+                <span class="emoji-decor decor-party">🎉</span>
+            </div>
+            <div class="title">Победитель: </div>
+            <div class="content">
+                <div class="winner-avatar-wrapper">
+                    <img alt="" id="winner-avatar">
+                </div>
+                <div class="winner-name"></div>
+            </div>
+        </section>
+        <section class="restart-timer" style="display: none;">
+            <span>Перезапуск через: </span>
+            <span id="restart-timer-value">0</span>
+        </section>
+        <section class="guessing">
+            <div class="last-words"></div>
+            <div class="best-match"></div>
+        </section>
+    </div>
+    <footer class="obs-overlay-footer page-width">
+        <button class="reset-btn reset-leaderboard-btn">Сбросить таблицу лидеров</button>
+    </footer>
+    <footer class="tech-things">
+        <span id="remove-test-user-from-leaderboard" title="удалить тестового пользователя из таблицы лидеров">.</span>
+    </footer>
+    <!-- Скрипты игры. init.js (Twitch) и analytics.js намеренно не подключены -->
+    <script src="js/config.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/api.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/easter_eggs.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/ws.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/settings.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/background.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/leaderboard.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/tips.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/confetti.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/solo.js?v=__ASSETS_VERSION__"></script>
+</body>
+
+</html>
