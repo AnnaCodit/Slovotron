@@ -7,6 +7,13 @@ const SOLO_COLOR = '#00FF00';
 const soloInput = document.getElementById('solo-input');
 const soloSubmit = document.getElementById('solo-submit');
 
+let solo_ready = false; // игра инициализирована: секретное слово получено
+
+function setSoloControlsEnabled(enabled) {
+    if (soloInput) soloInput.disabled = !enabled;
+    if (soloSubmit) soloSubmit.disabled = !enabled;
+}
+
 async function runQueue() {
     // Always shift the processed item, even if process_message throws.
     // Otherwise the queue stalls forever and guesses stop being handled.
@@ -31,12 +38,21 @@ async function app() {
 
         reset_round();
 
+        // Блокируем ввод, пока не получено секретное слово: иначе угадывание
+        // уйдёт в API с пустым challenge_id и слово потеряется.
+        setSoloControlsEnabled(false);
+
         // получение секретного слова для отгадывания
         secret_word_id = await generate_secret_word();
         console.log('Ключ игры: ', secret_word_id);
+
+        solo_ready = true;
+        setSoloControlsEnabled(true);
         addTextToLastWords('🎯 Слово загадано! Введите свой вариант ниже');
     } catch (error) {
         console.error(error);
+        // Управление остаётся заблокированным: раунд не запущен.
+        addTextToLastWords('⚠️ Не удалось начать игру. Проверьте интернет и настройки бэкенда (⚙️), затем нажмите 🔄');
     }
 }
 
@@ -44,6 +60,14 @@ function solo_guess() {
     if (is_game_finished) return;
 
     let message = (soloInput.value || '').trim();
+
+    // Слово ещё загадывается (или инициализация не удалась) — не отправляем
+    // запрос без валидного ключа игры, текст в поле сохраняем.
+    if (!solo_ready || !secret_word_id) {
+        if (message) addTextToLastWords('Подождите, слово ещё загадывается...');
+        return;
+    }
+
     soloInput.value = '';
 
     if (!message) return;
