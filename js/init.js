@@ -37,6 +37,17 @@ function create_chat_connection(channel_name = '') {
             user.badges?.moderator;
 
         const command = message.toLowerCase();
+        const moderatorTipCommands = [
+            '!словотрон-подсказка',
+            '!слв-рестарт',
+            '!slovotron-hint',
+            '!slv-hint'
+        ];
+
+        if (isModerator && !is_game_finished && moderatorTipCommands.includes(command.trim())) {
+            if (backend_supports_tips()) use_tip(user['username'], true);
+            return;
+        }
 
         if (isModerator && !is_game_finished && (command.startsWith('!sres') || command.startsWith('!словотрон-рес'))) {
             is_game_finished = true;

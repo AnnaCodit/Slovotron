@@ -20,9 +20,9 @@ const tip_progress_block = document.getElementById('tip-progress');
 const tip_progress_bar = document.querySelector('#tip-progress .bar');
 const tip_bulb = document.querySelector('#tip-progress .bulb');
 
-function update_tip_progress() {
+function update_tip_progress(completed = false) {
     let tip_required = Math.floor(uniqUsers.size / 2);
-    let tip_requests_count = tip_requests_users.size;
+    let tip_requests_count = completed ? tip_required : tip_requests_users.size;
 
     // Вычисляем прогресс один раз как число 0-100
     let progress = 0;
@@ -58,7 +58,7 @@ async function use_tip(user = '', force = false) {
     let tip_required = Math.floor(uniqUsers.size / 2); // сколько нужно людей для подсказки 
     // console.log('tip_requests:', tip_requests_count, 'tip_required:', tip_required);
 
-    update_tip_progress();
+    update_tip_progress(force);
     markOverlayActivity(); // высветляем оверлей при использовании подсказки тоже
 
     if (tip_requests_count < tip_required && !force) {
