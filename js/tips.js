@@ -43,6 +43,7 @@ function update_tip_progress(completed = false) {
 async function use_tip(user = '', force = false) {
     // Tips are unavailable on backends without a hint endpoint.
     if (!backend_supports_tips()) return;
+    if (is_game_finished) return;
     // console.log('enter "use_tip"', user);
     if (user && tip_requests_users.has(user) && !force) return;
     if (!best_found_distance) best_found_distance = backend_max_distance();
@@ -75,11 +76,16 @@ async function use_tip(user = '', force = false) {
 
     // The hint request is built per-backend: kontekstno applies its own multiplier,
     // wordgun uses best_found_distance directly as best_rank.
+    const tip_game_id = secret_word_id;
     let tip_word;
     try {
-        tip_word = await get_tip(secret_word_id, best_found_distance);
+        tip_word = await get_tip(tip_game_id, best_found_distance);
     } catch (e) {
         console.error('tip query failed', e);
+        abort_tip();
+        return;
+    }
+    if (is_game_finished || secret_word_id !== tip_game_id) {
         abort_tip();
         return;
     }
