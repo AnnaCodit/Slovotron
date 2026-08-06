@@ -2,6 +2,8 @@ const channelInput = document.getElementById("channel-name");
 const restartInput = document.getElementById("restart-time");
 const avatarInput = document.getElementById('win-avatar-enable');
 const soundInput = document.getElementById('sound-enable');
+const manualGuessSettingInput = document.getElementById('manual-guess-enable');
+const manualGuessSection = document.getElementById('manual-guess');
 const saveBtn = document.getElementById('save-settings-btn');
 const obsLinkInput = document.getElementById('obs-link');
 const gameBackendInput = document.getElementById('game-backend');
@@ -26,6 +28,19 @@ function getSettingValue(urlParams, paramName, storageName) {
 
 function getWordgunDifficultyLabel(value) {
     return WORDGUN_DIFFICULTY_LABELS[value] || value;
+}
+
+function updateManualGuessVisibility() {
+    if (!manualGuessSection) return;
+    const shouldShow = manual_guess_enable
+        && manual_guess_ready
+        && !document.body.classList.contains('obs-overlay');
+    manualGuessSection.style.display = shouldShow ? 'flex' : 'none';
+}
+
+function setManualGuessReady(isReady) {
+    manual_guess_ready = Boolean(isReady);
+    updateManualGuessVisibility();
 }
 
 function generateObsLink() {
@@ -150,6 +165,7 @@ function loadSettings() {
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
     const storedAvatarInput = getSettingValue(urlParams, 'win_avatar_enable', 'win_avatar_enable');
     const storedSoundInput = getSettingValue(urlParams, 'sound_enable', 'sound_enable');
+    const storedManualGuessInput = localStorage.getItem('manual_guess_enable');
 
     if (storedChannel) {
         channel_name = storedChannel;
@@ -173,6 +189,12 @@ function loadSettings() {
         sound_enable = parseBooleanSetting(storedSoundInput);
         if (soundInput) soundInput.checked = sound_enable;
     }
+
+    if (storedManualGuessInput !== null) {
+        manual_guess_enable = parseBooleanSetting(storedManualGuessInput);
+        if (manualGuessSettingInput) manualGuessSettingInput.checked = manual_guess_enable;
+    }
+    updateManualGuessVisibility();
 
     const storedBackend = urlParams.get('backend') || localStorage.getItem('game_backend');
     if (storedBackend && GAME_BACKENDS[storedBackend]) {
@@ -214,6 +236,12 @@ if (saveBtn) {
 
         if (soundInput) {
             localStorage.setItem('sound_enable', soundInput.checked);
+        }
+
+        if (manualGuessSettingInput) {
+            manual_guess_enable = manualGuessSettingInput.checked;
+            localStorage.setItem('manual_guess_enable', manual_guess_enable);
+            updateManualGuessVisibility();
         }
 
         if (gameBackendInput && GAME_BACKENDS[gameBackendInput.value]) {
@@ -325,6 +353,12 @@ if (avatarInput) {
 
 if (soundInput) {
     soundInput.addEventListener("input", () => {
+        checkFormsValidity();
+    });
+}
+
+if (manualGuessSettingInput) {
+    manualGuessSettingInput.addEventListener("input", () => {
         checkFormsValidity();
     });
 }

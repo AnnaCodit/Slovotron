@@ -51,6 +51,7 @@ function create_chat_connection(channel_name = '') {
 
         if (isModerator && !is_game_finished && (command.startsWith('!sres') || command.startsWith('!словотрон-рес'))) {
             is_game_finished = true;
+            setManualGuessReady(false);
             secret_word_id = await generate_secret_word();
             reset_round();
             sendWebhookEvent('game-new', {
@@ -58,6 +59,7 @@ function create_chat_connection(channel_name = '') {
                 secret_word: current_secret_word_data?.secret_word || null
             });
             is_game_finished = false;
+            setManualGuessReady(true);
             return;
         }
 
@@ -66,32 +68,45 @@ function create_chat_connection(channel_name = '') {
             return;
         }
 
-        // если в сообщении больше двух слов, 20 символов, слишком короткое или число, то игнорируем
-        if (message.split(' ').length > 1 || message.length > 20 || message.length <= 1 || !isNaN(message)) return;
-
-        // Приводим ЛЕД и ЛЁД к одному виду
-        message = message.replace(/ё/gi, 'е');
-
-        // prevent xss attack 
-        // числа убираем тоже, потому что апишка контекстно зачем-то считает валидными+однинаковыми и слово СТОЛ и СТОЛ12345 (бредик да)
-        message = message.replace(/[^a-zA-Zа-яА-Я]/g, '');
-
-        // а можно вот так, останутся любые буквы любого языка. задел на мультиязычную версию.
-        // message = message.replace(/[^\p{L}]/gu, ''); 
-
-        if (message.length < 2) return;
-
-        words_count++;
-        if (words_count === 1) {
-            document.getElementById('info').style.display = 'none';
-            document.getElementById('settings').style.display = 'none';
-        }
-        wordQueue.push({ 'user': user, 'color': color, 'msg': message })
-        if (wordQueue.length === 1) {
-            runQueue()
-        }
+        enqueue_guess(user, color, message);
     });
 
+}
+
+function normalize_guess(message = '') {
+    if (typeof message !== 'string') return '';
+    message = message.trim();
+
+    // если в сообщении больше двух слов, 20 символов, слишком короткое или число, то игнорируем
+    if (message.split(/\s+/).length > 1 || message.length > 20 || message.length <= 1 || !isNaN(message)) return '';
+
+    // Приводим ЛЕД и ЛЁД к одному виду
+    message = message.replace(/ё/gi, 'е');
+
+    // prevent xss attack
+    // числа убираем тоже, потому что апишка контекстно зачем-то считает валидными+однинаковыми и слово СТОЛ и СТОЛ12345 (бредик да)
+    message = message.replace(/[^a-zA-Zа-яА-Я]/g, '');
+
+    // а можно вот так, останутся любые буквы любого языка. задел на мультиязычную версию.
+    // message = message.replace(/[^\p{L}]/gu, '');
+
+    return message.length >= 2 ? message : '';
+}
+
+function enqueue_guess(user, color, message) {
+    const normalizedMessage = normalize_guess(message);
+    if (!normalizedMessage) return false;
+
+    words_count++;
+    if (words_count === 1) {
+        document.getElementById('info').style.display = 'none';
+        document.getElementById('settings').style.display = 'none';
+    }
+    wordQueue.push({ 'user': user, 'color': color, 'msg': normalizedMessage });
+    if (wordQueue.length === 1) {
+        runQueue();
+    }
+    return true;
 }
 
 async function runQueue() {
@@ -112,6 +127,7 @@ async function runQueue() {
 // basic app init
 async function app() {
     try {
+        setManualGuessReady(false);
         const ready = loadSettings();
 
         if (ready) {
@@ -125,6 +141,7 @@ async function app() {
                 challenge_id: secret_word_id,
                 secret_word: current_secret_word_data?.secret_word || null
             });
+            setManualGuessReady(true);
 
             // подключение к чату твича и начало получения сообщений
             create_chat_connection(channel_name);
@@ -134,13 +151,45 @@ async function app() {
             analytics_reach_goal('game_start', { 'channel_name': channel_name });
 
         } else {
+            setManualGuessReady(false);
             document.getElementById('settings').style.display = 'block';
             if (game_backend === 'wordgun') loadWordgunOptions();
         }
 
     } catch (error) {
+        setManualGuessReady(false);
         console.error(error);
     }
+}
+
+const manualGuessForm = document.getElementById('manual-guess-form');
+const manualGuessInput = document.getElementById('manual-guess-input');
+
+if (manualGuessForm && manualGuessInput) {
+    manualGuessForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        manualGuessInput.setCustomValidity('');
+
+        if (!manual_guess_ready || is_game_finished) {
+            manualGuessInput.setCustomValidity('Дождитесь начала следующего раунда.');
+            manualGuessInput.reportValidity();
+            return;
+        }
+
+        const streamer = { username: channel_name, 'display-name': channel_name };
+        if (!enqueue_guess(streamer, '#00FF00', manualGuessInput.value)) {
+            manualGuessInput.setCustomValidity('Введите одно слово от 2 до 20 букв.');
+            manualGuessInput.reportValidity();
+            return;
+        }
+
+        manualGuessInput.value = '';
+        manualGuessInput.focus();
+    });
+
+    manualGuessInput.addEventListener('input', () => {
+        manualGuessInput.setCustomValidity('');
+    });
 }
 
 app();

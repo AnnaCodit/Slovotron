@@ -205,6 +205,7 @@ function message_template(word, distance, name, nickname_color) {
 function handle_win(winner_user, winning_word = '') {
 
     is_game_finished = true;
+    setManualGuessReady(false);
     winTime = Date.now();
 
     tip_menu_button.style.display = 'none';
@@ -299,6 +300,7 @@ async function resetRoundTimeout(time) {
         if (leaderboardSection) leaderboardSection.style.display = 'none';
 
         is_game_finished = false;
+        setManualGuessReady(true);
     }, time);
 }
 

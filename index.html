@@ -117,10 +117,12 @@
                                 <input type="checkbox" id="sound-enable" checked>
                             </div>
                         </div>
-                        <!-- <div class="setting">
-                <div class="title">Поле для добавления слова</div>
-                <input type="checkbox" id="allow-add-word-checkbox" name="allow-add-word">
-            </div> -->
+                        <div class="setting checkbox-container">
+                            <label class="title" for="manual-guess-enable">Показывать поле для ввода слов?</label>
+                            <div>
+                                <input type="checkbox" id="manual-guess-enable">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="save-buttton-wrapper">
@@ -209,6 +211,13 @@
         <section class="restart-timer" style="display: none;">
             <span>Перезапуск через: </span>
             <span id="restart-timer-value">0</span>
+        </section>
+        <section id="manual-guess" class="content-box" style="display: none;">
+            <form id="manual-guess-form">
+                <input type="text" id="manual-guess-input" aria-label="Слово для проверки" placeholder="Введите слово"
+                    minlength="2" maxlength="30" autocomplete="off" required>
+                <button type="submit" id="manual-guess-submit">Проверить</button>
+            </form>
         </section>
         <section class="guessing">
             <div class="last-words"></div>
