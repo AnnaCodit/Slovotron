@@ -85,7 +85,7 @@ function normalize_guess(message = '') {
 
     // prevent xss attack
     // числа убираем тоже, потому что апишка контекстно зачем-то считает валидными+однинаковыми и слово СТОЛ и СТОЛ12345 (бредик да)
-    message = message.replace(/[^a-zA-Zа-яА-Я]/g, '');
+    message = message.replace(/[^a-zA-Zа-яА-Я\-]/g, '');
 
     // а можно вот так, останутся любые буквы любого языка. задел на мультиязычную версию.
     // message = message.replace(/[^\p{L}]/gu, '');
