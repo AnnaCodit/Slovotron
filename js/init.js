@@ -24,10 +24,7 @@ function create_chat_connection(channel_name = '') {
         // console.log(user['display-name']);
 
         // проверка на подсказку, дальше не идем
-        if (message.toLowerCase().startsWith('!подска') || message.toLowerCase().startsWith('! подска')) {
-            if (backend_supports_tips()) use_tip(user['username']);
-            return;
-        }
+        if (handle_tip_command(message, user['username'])) return;
 
         // Проверяем на действия модераторов
         const isModerator =
@@ -71,6 +68,16 @@ function create_chat_connection(channel_name = '') {
         enqueue_guess(user, color, message);
     });
 
+}
+
+function handle_tip_command(message = '', username = '') {
+    if (typeof message !== 'string') return false;
+
+    const command = message.toLowerCase();
+    if (!command.startsWith('!подска') && !command.startsWith('! подска')) return false;
+
+    if (backend_supports_tips()) use_tip(username);
+    return true;
 }
 
 function normalize_guess(message = '') {
@@ -177,7 +184,15 @@ if (manualGuessForm && manualGuessInput) {
         }
 
         const streamer = { username: channel_name, 'display-name': channel_name };
-        if (!enqueue_guess(streamer, '#00FF00', manualGuessInput.value)) {
+        const message = manualGuessInput.value;
+
+        if (handle_tip_command(message, streamer.username)) {
+            manualGuessInput.value = '';
+            manualGuessInput.focus();
+            return;
+        }
+
+        if (!enqueue_guess(streamer, '#00FF00', message)) {
             manualGuessInput.setCustomValidity('Введите одно слово от 2 до 20 букв.');
             manualGuessInput.reportValidity();
             return;
