@@ -40,6 +40,21 @@ function addTextToLastWords(text = '') {
     addAnythingToLastWords(html);
 }
 
+function addWordStatusToLastWords(word = '', status = '') {
+    const word_display = typeof render_word_html === 'function' ? render_word_html(word) : word;
+    const is_banned = typeof is_banword === 'function' && is_banword(word);
+    const banword_class = is_banned ? ' banword' : '';
+    const html = `
+        <div class="msg${banword_class}">
+            <div class="msg-content">
+                <div class="word-and-distance">
+                    <div class="word">${word_display} ${status}</div>
+                </div>
+            </div>
+        </div>`;
+    addAnythingToLastWords(html);
+}
+
 function getDistanceColor(distance) {
     const colors = [
         'linear-gradient(90deg,rgba(128, 0, 128, 0.5) 0%, rgba(128, 0, 128, 1) 100%);',
@@ -82,7 +97,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
             repeatWords++;
         }
         // добавить слово в колонку .guessing .last-words в верх списка
-        addTextToLastWords(word + ' уже было использовано');
+        addWordStatusToLastWords(word, 'уже было использовано');
         // console.log(`Слово "${word}" уже было проверено.`);
         return;
     }
@@ -101,14 +116,14 @@ async function process_message(user, nickname_color, word, force_win = false) {
         }
     } catch (err) {
         console.warn('Ошибка проверки слова:', err);
-        addTextToLastWords(word + ' ошибка API');
+        addWordStatusToLastWords(word, 'ошибка API');
         return;
     }
 
     checked_words.set(word, { distance: word_check.distance });
 
     if (!word_check.distance) {
-        addTextToLastWords(word + ' не найдено в словаре');
+        addWordStatusToLastWords(word, 'не найдено в словаре');
         // console.log(`Слово "${word}" не имеет дистанци.`);
         return;
     }
@@ -185,13 +200,16 @@ function message_template(word, distance, name, nickname_color) {
 
     const width = Math.max(0, 100 - (distance / 2800) * 100);
     const distance_color = getDistanceColor(distance);
+    const word_display = typeof render_word_html === 'function' ? render_word_html(word) : word;
+    const is_banned = typeof is_banword === 'function' && is_banword(word);
+    const banword_class = is_banned ? ' banword' : '';
 
     return `
-        <div class="msg" data-distance="${distance}">
+        <div class="msg${banword_class}" data-distance="${distance}">
             <div class="msg-content">
                 <div class="bg" style="width: ${width}%; background: ${distance_color}"></div>
                 <div class="word-and-distance">
-                    <div class="word">${word}</div>
+                    <div class="word">${word_display}</div>
                     <div class="distance">${distance}</div>
                 </div>
                 <div class="name" style="color: ${nickname_color}; white-space: nowrap;">
