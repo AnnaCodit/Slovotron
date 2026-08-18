@@ -41,14 +41,12 @@ function addTextToLastWords(text = '') {
 }
 
 function addWordStatusToLastWords(word = '', status = '') {
-    const word_display = typeof render_word_html === 'function' ? render_word_html(word) : word;
-    const is_banned = typeof is_banword === 'function' && is_banword(word);
-    const banword_class = is_banned ? ' banword' : '';
+    const banword_class = is_banword(word) ? ' banword' : '';
     const html = `
         <div class="msg${banword_class}">
             <div class="msg-content">
                 <div class="word-and-distance">
-                    <div class="word">${word_display} ${status}</div>
+                    <div class="word">${render_word_html(word)} ${status}</div>
                 </div>
             </div>
         </div>`;
@@ -200,16 +198,14 @@ function message_template(word, distance, name, nickname_color) {
 
     const width = Math.max(0, 100 - (distance / 2800) * 100);
     const distance_color = getDistanceColor(distance);
-    const word_display = typeof render_word_html === 'function' ? render_word_html(word) : word;
-    const is_banned = typeof is_banword === 'function' && is_banword(word);
-    const banword_class = is_banned ? ' banword' : '';
+    const banword_class = is_banword(word) ? ' banword' : '';
 
     return `
         <div class="msg${banword_class}" data-distance="${distance}">
             <div class="msg-content">
                 <div class="bg" style="width: ${width}%; background: ${distance_color}"></div>
                 <div class="word-and-distance">
-                    <div class="word">${word_display}</div>
+                    <div class="word">${render_word_html(word)}</div>
                     <div class="distance">${distance}</div>
                 </div>
                 <div class="name" style="color: ${nickname_color}; white-space: nowrap;">
