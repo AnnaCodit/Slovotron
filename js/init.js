@@ -141,8 +141,16 @@ async function app() {
 
             reset_round();
 
-            // получение секретного слова для отгадывания
-            secret_word_id = await generate_secret_word();
+            // получение секретного слова и данных стримера параллельно
+            const [secretId, twitchUser] = await Promise.all([
+                generate_secret_word(),
+                getTwitchUserData(channel_name).catch(e => {
+                    console.warn('Не удалось получить данные стримера для аналитики:', e);
+                    return null;
+                })
+            ]);
+
+            secret_word_id = secretId;
             console.log('Ключ игры: ', secret_word_id);
             sendWebhookEvent('game-new', {
                 challenge_id: secret_word_id,
@@ -154,8 +162,17 @@ async function app() {
             create_chat_connection(channel_name);
 
             // отправка данных об использовании игры в аналитику
-            analytics_set_visit_params({ 'channel_name': channel_name });
-            analytics_reach_goal('game_start', { 'channel_name': channel_name });
+            const is_obs = document.body.classList.contains('obs-overlay') ? 1 : 0;
+            const startParams = {
+                channel_name: channel_name,
+                followers: typeof twitchUser?.followers === 'number' ? twitchUser.followers : 0,
+                chatterCount: typeof twitchUser?.chatterCount === 'number' ? twitchUser.chatterCount : 0,
+                is_obs: is_obs,
+                game_backend: game_backend
+            };
+
+            analytics_set_visit_params(startParams);
+            analytics_reach_goal('game_start', startParams);
 
         } else {
             setManualGuessReady(false);

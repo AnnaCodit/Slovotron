@@ -390,17 +390,22 @@ function show_fullscreen_error(message) {
 }
 
 async function getTwitchUserData(username) {
+    if (!username) return null;
     try {
-        const response = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${username}`);
+        const response = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(username)}`);
+        if (!response.ok) {
+            console.warn(`Twitch user API error: HTTP ${response.status}`);
+            return null;
+        }
         const data = await response.json();
 
         if (data && data[0]) {
             return data[0];
         } else {
-            console.error("Пользователь не найден");
+            console.warn("Пользователь не найден");
         }
     } catch (error) {
-        console.error("Ошибка запроса:", error);
+        console.warn("Ошибка запроса к api.ivr.fi user API:", error);
     }
     return null;
 }

@@ -246,6 +246,8 @@ function handle_win(winner_user, winning_word = '') {
     winnerBlock.querySelector('.winner-name').innerText = winner_user['display-name'];
     winnerBlock.style.display = 'block';
 
+    const roundDurationSec = roundStartTime ? Math.max(0, Math.floor((Date.now() - roundStartTime) / 1000)) : 0;
+
     sendWebhookEvent('game-win', {
         winner: {
             login: winner_user.username || '',
@@ -255,8 +257,19 @@ function handle_win(winner_user, winning_word = '') {
         attempts_used: checked_words.size,
         unique_words: uniqWords,
         repeated_words: repeatWords,
-        round_duration_sec: roundStartTime ? Math.floor((Date.now() - roundStartTime) / 1000) : null
+        round_duration_sec: roundDurationSec
     });
+
+    if (typeof analytics_reach_goal === 'function') {
+        analytics_reach_goal('round_win', {
+            channel_name: channel_name,
+            game_backend: game_backend,
+            unique_players_count: uniqUsers.size,
+            total_guesses_count: checked_words.size,
+            round_duration_sec: roundDurationSec,
+            hints_used: typeof hints_used === 'number' ? hints_used : 0
+        });
+    }
 
     const resetTimeout = (typeof restart_time !== 'undefined' ? restart_time : 20) * 1000;
     let confettiTimeout = Date.now() + (restart_time - 5) * 1000;
@@ -328,6 +341,7 @@ function reset_round() {
     roundStartTime = Date.now();
     uniqUsers.clear();
     uniqWords = repeatWords = 0;
+    hints_used = 0;
     reset_tips();
     best_found_distance = backend_max_distance();
     markOverlayActivity();

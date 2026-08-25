@@ -28,6 +28,7 @@ let resetTimerPaused;
 let roundStartTime;
 let uniqWords;
 let repeatWords;
+let hints_used = 0;
 let winTime;
 let uniqUsers = new Set();
 const checked_words = new Map();

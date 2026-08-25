@@ -54,6 +54,11 @@ function analytics_set_visit_params(params = {}) {
     waitForYm(() => {
         console.log('Отправили параметр визита в яндекс.метрику', params);
         ym(yandex_metrica_id, 'params', params);
+        if (params.channel_name) {
+            ym(yandex_metrica_id, 'userParams', {
+                channel_name: params.channel_name
+            });
+        }
     });
 
     if (typeof gtag === 'function') {

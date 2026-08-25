@@ -104,6 +104,7 @@ async function use_tip(user = '', force = false) {
     console.log('tip_word:', tip_word);
     best_found_distance = tip_word.distance; // обновляем текущую лучшую дальность
     console.log('best_found_distance after tip:', best_found_distance);
+    hints_used++;
 
     // Wait a bit for animation to show before resetting/hiding
     setTimeout(() => {
