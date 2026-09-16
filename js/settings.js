@@ -10,11 +10,6 @@ const gameBackendInput = document.getElementById('game-backend');
 const backendWarning = document.getElementById('backend-warning');
 const wordgunDifficultyInput = document.getElementById('wordgun-difficulty');
 const wordgunSettingBlocks = document.querySelectorAll('.wordgun-setting');
-const WORDGUN_DIFFICULTY_LABELS = {
-    medium: 'Обычная',
-    hard: 'Тяжелая',
-    hell: 'Ад'
-};
 let validationTimeout;
 let wordgunOptionsLoaded = false;
 
@@ -24,10 +19,6 @@ function parseBooleanSetting(value) {
 
 function getSettingValue(urlParams, paramName, storageName) {
     return urlParams.has(paramName) ? urlParams.get(paramName) : localStorage.getItem(storageName);
-}
-
-function getWordgunDifficultyLabel(value) {
-    return WORDGUN_DIFFICULTY_LABELS[value] || value;
 }
 
 function updateManualGuessVisibility() {
@@ -209,7 +200,7 @@ function loadSettings() {
     }
     wordgun_difficulty = storedWordgunDifficulty.trim();
 
-    // Show the stored value right away; the real option list arrives from GET /v2/list_model only once the settings panel is actually opened.
+    // Show the stored value right away; the real option list arrives from GET /v2/get_model only once the settings panel is actually opened.
     ensureSelectOption(wordgunDifficultyInput, wordgun_difficulty);
 
     updateBackendSettings();
@@ -380,33 +371,38 @@ function updateBackendSettings() {
 
 // Keep a stored value selectable even before (or without) the option list —
 // otherwise a saved model would silently reset to the default.
+// The tier id stands in for the label here: the real one is localized by the
+// server and only arrives with the option list, which replaces this option.
 function ensureSelectOption(select, value) {
     if (!select || !value) return;
     const exists = Array.from(select.options).some((option) => option.value === value);
-    if (!exists) select.add(new Option(getWordgunDifficultyLabel(value), value));
+    if (!exists) select.add(new Option(value, value));
     select.value = value;
 }
 
-function fillSelectOptions(select, values, current, emptyLabel) {
+// `tiers` is what wordgun_list_difficulties() returns: [{ name, label }], where
+// the label is the tier's name in the user's language as the server ships it.
+function fillSelectOptions(select, tiers, current, emptyLabel) {
     if (!select) return;
     select.innerHTML = '';
     select.add(new Option(emptyLabel, ''));
-    values.forEach((value) => select.add(new Option(getWordgunDifficultyLabel(value), value)));
-    if (current && !values.includes(current)) {
-        select.add(new Option(`${getWordgunDifficultyLabel(current)} (недоступно)`, current));
+    tiers.forEach((tier) => select.add(new Option(tier.label, tier.name)));
+    if (current && !tiers.some((tier) => tier.name === current)) {
+        select.add(new Option(`${current} (недоступно)`, current));
     }
     select.value = current || '';
 }
 
-// Pull the difficulties from GET /v2/list_model. Called lazily so the OBS overlay
-// — which reads everything from the URL — never hits the endpoint.
+// Pull the difficulty tiers of the model we play from GET /v2/get_model. Called
+// lazily so the OBS overlay — which reads everything from the URL — never hits
+// the endpoint.
 async function loadWordgunOptions() {
     if (wordgunOptionsLoaded || !wordgunDifficultyInput) return;
 
     try {
-        const info = await wordgun_list_models();
+        const tiers = await wordgun_list_difficulties();
         wordgunOptionsLoaded = true;
-        fillSelectOptions(wordgunDifficultyInput, info.difficulties, wordgun_difficulty, 'Без ограничения');
+        fillSelectOptions(wordgunDifficultyInput, tiers, wordgun_difficulty, 'Без ограничения');
     } catch (error) {
         // A failed lookup must not wipe the saved setting, so keep what we have.
         console.warn('Не удалось загрузить список сложностей wordgun:', error);

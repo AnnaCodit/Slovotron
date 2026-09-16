@@ -7,7 +7,7 @@ let manual_guess_enable = false;
 let webhook_url = '';
 let webhook_secret = '';
 let game_backend = 'kontekstno'; // active word-guessing backend: 'kontekstno' | 'wordgun'
-const wordgun_model = 'ru-context-v1'; // wordgun v2 model; not user-configurable
+const wordgun_model = 'best'; // wordgun v2 alias: always the best model the server ships; not user-configurable
 let wordgun_difficulty = ''; // wordgun v2 difficulty; empty = whole vocabulary
 let current_secret_word_data = null;
 
