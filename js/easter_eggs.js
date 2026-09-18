@@ -43,7 +43,7 @@ const celebrities = [
     },
     {
         id: "severinasoda",
-        tags: ["severina", "soda", "северина"],
+        tags: ["severina", "soda", "северина", "severinasoda", "северинасода"],
         img_left: ["soda-1.png"],
         img_right: ["soda-2.png", "soda-3.png"]
     }
