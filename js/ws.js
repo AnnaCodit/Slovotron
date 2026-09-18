@@ -113,6 +113,13 @@ async function process_message(user, nickname_color, word, force_win = false) {
             word_check = await score_word(word, secret_word_id);
         }
     } catch (err) {
+        // Any guess error can mean the game itself is gone (an expired token, for
+        // one), so ask the backend — the report stays the same either way.
+        if (await backend_game_is_live(secret_word_id) === false) {
+            console.warn('Игра больше не существует на сервере.');
+            addWordStatusToLastWords(word, 'Ошибка: Игра больше не существует.');
+            return;
+        }
         console.warn('Ошибка проверки слова:', err);
         addWordStatusToLastWords(word, 'ошибка API');
         return;

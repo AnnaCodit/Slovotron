@@ -40,6 +40,12 @@ const celebrities = [
         tags: ["мемель", "memel", "миреднеси", "mirednesy"],
         img_left: ["mirednesy_1.gif"],
         img_right: ["mirednesy_2.png", "mirednesy_3.gif", "mirednesy_4.avif", "mirednesy_5.avif"]
+    },
+    {
+        id: "severinasoda",
+        tags: ["severina", "soda", "северина"],
+        img_left: ["soda-1.png"],
+        img_right: ["soda-2.png", "soda-3.png"]
     }
 ];
 

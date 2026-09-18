@@ -289,23 +289,44 @@ const GAME_BACKENDS = {
             const result = await wordgun_request('/v2/hint', { method: 'POST', body });
             // { word: null } means no closer word remains.
             return { word: result?.word ?? null, distance: result?.rank };
+        },
+
+        // Whether this token's game is still the active one on the server:
+        // registered and within the 30-minute token lifetime. An expired token
+        // answers false here rather than erroring.
+        async isLive(gameId) {
+            const result = await wordgun_request('/v2/is_live', {
+                method: 'POST',
+                body: { token: gameId }
+            });
+            return result?.is_live === true;
         }
     }
 };
 
-// The models and difficulties available on the server, fetched once and cached.
-let wordgun_models_cache = null;
+// The difficulty tiers of the model we play, fetched once and cached.
+// Tiers are declared per model — both their names and how many there are differ —
+// so GET /v2/get_model is the only place they are published; GET /v2/list_model
+// lists models and aliases and nothing else. Asking by alias is fine: the server
+// resolves it and answers with the tiers of the model that alias points at.
+let wordgun_difficulties_cache = null;
 
-async function wordgun_list_models() {
-    if (wordgun_models_cache) return wordgun_models_cache;
+async function wordgun_list_difficulties() {
+    if (wordgun_difficulties_cache) return wordgun_difficulties_cache;
 
-    const data = await wordgun_request('/v2/list_model');
-    wordgun_models_cache = {
-        models: Array.isArray(data?.models) ? data.models : [],
-        defaultModel: data?.default || '',
-        difficulties: Array.isArray(data?.difficulties) ? data.difficulties : []
-    };
-    return wordgun_models_cache;
+    const query = wordgun_model ? `?model=${encodeURIComponent(wordgun_model)}` : '';
+    const data = await wordgun_request(`/v2/get_model${query}`);
+    const tiers = Array.isArray(data?.difficulty) ? data.difficulty : [];
+
+    wordgun_difficulties_cache = tiers
+        .filter((tier) => tier && typeof tier.name === 'string')
+        .map((tier) => ({
+            name: tier.name,
+            // The server ships a localized name per tier; fall back to English and
+            // then to the tier id, since a model may declare no translations.
+            label: tier.i18n?.ru || tier.i18n?.en || tier.name
+        }));
+    return wordgun_difficulties_cache;
 }
 
 function getActiveBackend() {
@@ -326,6 +347,19 @@ function backend_max_distance() {
 // when the word is in vocabulary, undefined otherwise.
 async function score_word(word, gameId) {
     return getActiveBackend().score(gameId, word);
+}
+
+// Ask the active backend whether the game still exists on its side. Returns null
+// when it cannot tell — no such check, or the check itself failed.
+async function backend_game_is_live(gameId) {
+    const backend = getActiveBackend();
+    if (typeof backend.isLive !== 'function') return null;
+    try {
+        return await backend.isLive(gameId);
+    } catch (error) {
+        console.warn('Не удалось проверить статус игры:', error);
+        return null;
+    }
 }
 
 // Request a hint word from the active backend, or null if it has no tip support.
