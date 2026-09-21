@@ -223,6 +223,14 @@ function message_template(word, distance, name, nickname_color) {
     `;
 }
 
+function play_win_sound() {
+    if (!sound_enable) return;
+
+    const audio = new Audio(win_sound_url || DEFAULT_WIN_SOUND_URL);
+    audio.volume = WIN_SOUND_VOLUME;
+    audio.play().catch(e => console.error('Ошибка воспроизведения звука победы:', e));
+}
+
 function handle_win(winner_user, winning_word = '') {
 
     is_game_finished = true;
@@ -290,6 +298,8 @@ function handle_win(winner_user, winning_word = '') {
     if (window.innerWidth > 1200) {
         confetti_fireworks(confettiTimeout);
     }
+
+    play_win_sound();
 
     if (restart_time > 0 && !document.hidden) {
         const menuTimer = document.getElementById('menu-timer');

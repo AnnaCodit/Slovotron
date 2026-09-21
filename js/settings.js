@@ -1,5 +1,6 @@
 const channelInput = document.getElementById("channel-name");
 const restartInput = document.getElementById("restart-time");
+const winSoundUrlInput = document.getElementById('win-sound-url');
 const avatarInput = document.getElementById('win-avatar-enable');
 const soundInput = document.getElementById('sound-enable');
 const manualGuessSettingInput = document.getElementById('manual-guess-enable');
@@ -52,6 +53,10 @@ function generateObsLink() {
 
     if (restartInput && restartInput.value) {
         params.set('restart_time', restartInput.value.trim());
+    }
+
+    if (winSoundUrlInput && winSoundUrlInput.value.trim()) {
+        params.set('win_sound_url', winSoundUrlInput.value.trim());
     }
 
     if (avatarInput) {
@@ -154,6 +159,7 @@ function loadSettings() {
     }
     const storedChannel = urlChannel || localStorage.getItem('channel_name');
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
+    const storedWinSoundUrl = getSettingValue(urlParams, 'win_sound_url', 'win_sound_url');
     const storedAvatarInput = getSettingValue(urlParams, 'win_avatar_enable', 'win_avatar_enable');
     const storedSoundInput = getSettingValue(urlParams, 'sound_enable', 'sound_enable');
     const storedManualGuessInput = localStorage.getItem('manual_guess_enable');
@@ -169,6 +175,11 @@ function loadSettings() {
             restart_time = parsed;
             if (restartInput) restartInput.value = restart_time;
         }
+    }
+
+    if (storedWinSoundUrl !== null) {
+        win_sound_url = storedWinSoundUrl.trim();
+        if (winSoundUrlInput) winSoundUrlInput.value = win_sound_url;
     }
 
     if (storedAvatarInput !== null) {
@@ -221,6 +232,11 @@ if (saveBtn) {
             localStorage.setItem('restart_time', restartInput.value.trim());
         }
 
+        if (winSoundUrlInput) {
+            win_sound_url = winSoundUrlInput.value.trim();
+            localStorage.setItem('win_sound_url', win_sound_url);
+        }
+
         if (avatarInput) {
             localStorage.setItem('win_avatar_enable', avatarInput.checked);
         }
@@ -257,7 +273,9 @@ if (saveBtn) {
 
 function checkFormsValidity() {
     if (saveBtn) {
-        saveBtn.disabled = !channelInput.validity.valid || !restartInput.validity.valid;
+        saveBtn.disabled = !channelInput.validity.valid
+            || !restartInput.validity.valid
+            || (winSoundUrlInput && !winSoundUrlInput.validity.valid);
     }
 }
 
@@ -322,6 +340,14 @@ if (channelInput) {
 if (restartInput) {
     restartInput.addEventListener("input", () => {
         restartInput.reportValidity();
+        checkFormsValidity();
+    });
+}
+
+if (winSoundUrlInput) {
+    winSoundUrlInput.addEventListener("input", () => {
+        winSoundUrlInput.reportValidity();
+        generateObsLink();
         checkFormsValidity();
     });
 }

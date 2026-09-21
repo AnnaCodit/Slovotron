@@ -19,7 +19,7 @@
     padding: 20px;
     border-radius: 10px;
     max-width: 400px;
-    margin: 0 auto;
+    margin: 0 auto 40px;
 }
 
 #settings .obs-link-box .setting input {

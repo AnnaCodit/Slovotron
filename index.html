@@ -121,6 +121,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap"
         rel="stylesheet">
+    <meta name="yandex-verification" content="24b12ac180916b0a" />
 </head>
 
 <body>
@@ -186,6 +187,11 @@
                             <div class="title">Перезапуск игры после победы (секунды)</div>
                             <input type="number" id="restart-time" name="restart_time" placeholder="20" min="0">
                         </div>
+                        <div class="setting">
+                            <div class="title" for="win-sound-url">Ссылка на звук победы</div>
+                            <input type="url" id="win-sound-url" name="win_sound_url"
+                                placeholder="Например: https://test.ru/win.mp3">
+                        </div>
                     </div>
                     <div class="ui-col">
                         <div class="setting">
@@ -230,22 +236,6 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-settings-box">
-                <div class="setting">
-                    <div class="title">Фоновое изображение</div>
-                    <div class="bg-file-row">
-                        <label class="bg-file-label" for="bg-file-input">Выбрать файл</label>
-                        <input type="file" id="bg-file-input" accept="image/*">
-                        <span id="bg-file-name">Файл не выбран</span>
-                        <button id="bg-clear-btn" style="display: none">Удалить</button>
-                    </div>
-                    <div id="bg-opacity-section">
-                        <span>Прозрачность:</span>
-                        <input type="range" id="bg-opacity-slider" min="0" max="100" value="100">
-                        <span id="bg-opacity-value">100%</span>
-                    </div>
-                </div>
-            </div>
             <div class="obs-link-box">
                 <div class="setting">
                     <div class="title">
@@ -259,6 +249,22 @@
                     <div class="obs-link">
                         <input type="text" id="obs-link" name="obs_link" placeholder="Сначала заполните название канала"
                             disabled required>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-settings-box">
+                <div class="setting">
+                    <div class="title">Фоновое изображение</div>
+                    <div class="bg-file-row">
+                        <label class="bg-file-label" for="bg-file-input">Выбрать файл</label>
+                        <input type="file" id="bg-file-input" accept="image/*">
+                        <span id="bg-file-name">Файл не выбран</span>
+                        <button id="bg-clear-btn" style="display: none">Удалить</button>
+                    </div>
+                    <div id="bg-opacity-section">
+                        <span>Прозрачность:</span>
+                        <input type="range" id="bg-opacity-slider" min="0" max="100" value="100">
+                        <span id="bg-opacity-value">100%</span>
                     </div>
                 </div>
             </div>
