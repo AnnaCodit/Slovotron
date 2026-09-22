@@ -443,3 +443,27 @@ async function getTwitchUserData(username) {
     }
     return null;
 }
+
+async function getTwitchTrackerChannelSummary(username) {
+    if (!username) return null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    try {
+        const response = await fetch(
+            `https://twitchtracker.com/api/channels/summary/${encodeURIComponent(username)}`,
+            { signal: controller.signal }
+        );
+        if (!response.ok) {
+            console.warn(`TwitchTracker API error: HTTP ${response.status}`);
+            return null;
+        }
+
+        const data = await response.json();
+        return data && typeof data === 'object' ? data : null;
+    } catch (error) {
+        console.warn('Ошибка запроса к TwitchTracker API:', error);
+    } finally {
+        clearTimeout(timeoutId);
+    }
+    return null;
+}

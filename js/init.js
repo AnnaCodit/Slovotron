@@ -10,9 +10,6 @@ function create_chat_connection(channel_name = '') {
         channels: [channel_name]
     });
 
-    // Подключаемся
-    tmi_client.connect();
-
     // Слушаем сообщения
     // user — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
     tmi_client.on('message', async (channel, user, message, self) => {
@@ -68,6 +65,8 @@ function create_chat_connection(channel_name = '') {
         enqueue_guess(user, color, message);
     });
 
+    // Подключаемся
+    return tmi_client.connect();
 }
 
 function handle_tip_command(message = '', username = '') {
@@ -159,7 +158,13 @@ async function app() {
             setManualGuessReady(true);
 
             // подключение к чату твича и начало получения сообщений
-            create_chat_connection(channel_name);
+            await create_chat_connection(channel_name).catch(e => {
+                console.warn('Не удалось дождаться подключения к чату Twitch:', e);
+            });
+
+            // TwitchTracker считает средний онлайн за последние 30 дней.
+            // Получаем его один раз за игровую сессию, после подключения к чату.
+            const twitchTrackerSummary = await getTwitchTrackerChannelSummary(channel_name);
 
             // отправка данных об использовании игры в аналитику
             const is_obs = document.body.classList.contains('obs-overlay') ? 1 : 0;
@@ -170,6 +175,10 @@ async function app() {
                 is_obs: is_obs,
                 game_backend: game_backend
             };
+
+            if (typeof twitchTrackerSummary?.avg_viewers === 'number') {
+                startParams.avg_viewers = twitchTrackerSummary.avg_viewers;
+            }
 
             analytics_set_visit_params(startParams);
             analytics_reach_goal('game_start', startParams);
