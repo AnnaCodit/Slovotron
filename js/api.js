@@ -94,8 +94,41 @@ async function kontekstno_query({
     }
 }
 
+function is_allowed_webhook_url(raw_url) {
+    let parsed;
+    try {
+        parsed = new URL(raw_url);
+    } catch {
+        return false;
+    }
+
+    if (parsed.protocol !== 'https:') return false;
+
+    const hostname = parsed.hostname.toLowerCase();
+    const blocked_hostnames = ['localhost', '0.0.0.0'];
+    if (blocked_hostnames.includes(hostname)) return false;
+
+    // Блокируем IP-литералы из приватных/локальных/служебных диапазонов
+    // (loopback, RFC1918, link-local, cloud metadata и т.п.).
+    const ipv4_match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (ipv4_match) {
+        const octets = ipv4_match.slice(1, 5).map(Number);
+        const [a, b] = octets;
+        if (a === 127 || a === 10 || a === 0 || a === 169 && b === 254) return false;
+        if (a === 172 && b >= 16 && b <= 31) return false;
+        if (a === 192 && b === 168) return false;
+    }
+    if (hostname === '::1' || hostname.startsWith('fc') || hostname.startsWith('fd') || hostname.startsWith('fe80')) return false;
+
+    return true;
+}
+
 async function sendWebhookEvent(event = '', data = {}) {
     if (!webhook_url || !event) return;
+    if (!is_allowed_webhook_url(webhook_url)) {
+        console.warn(`Webhook URL "${webhook_url}" заблокирован по правилам безопасности`);
+        return;
+    }
 
     try {
         await fetch(webhook_url, {
