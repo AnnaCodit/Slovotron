@@ -2,6 +2,7 @@ const channelInput = document.getElementById("channel-name");
 const restartInput = document.getElementById("restart-time");
 const winSoundUrlInput = document.getElementById('win-sound-url');
 const avatarInput = document.getElementById('win-avatar-enable');
+const winNotificationInput = document.getElementById('win-notification-enable');
 const soundInput = document.getElementById('sound-enable');
 const manualGuessSettingInput = document.getElementById('manual-guess-enable');
 const manualGuessSection = document.getElementById('manual-guess');
@@ -61,6 +62,10 @@ function generateObsLink() {
 
     if (avatarInput) {
         params.set('win_avatar_enable', avatarInput.checked ? '1' : '0');
+    }
+
+    if (winNotificationInput) {
+        params.set('win_notification_enable', winNotificationInput.checked ? '1' : '0');
     }
 
     if (soundInput) {
@@ -161,6 +166,7 @@ function loadSettings() {
     const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
     const storedWinSoundUrl = getSettingValue(urlParams, 'win_sound_url', 'win_sound_url');
     const storedAvatarInput = getSettingValue(urlParams, 'win_avatar_enable', 'win_avatar_enable');
+    const storedWinNotificationInput = getSettingValue(urlParams, 'win_notification_enable', 'win_notification_enable');
     const storedSoundInput = getSettingValue(urlParams, 'sound_enable', 'sound_enable');
     const storedManualGuessInput = localStorage.getItem('manual_guess_enable');
 
@@ -186,6 +192,9 @@ function loadSettings() {
         win_avatar_enable = parseBooleanSetting(storedAvatarInput);
         if (avatarInput) avatarInput.checked = win_avatar_enable;
     }
+
+    win_notification_enable = storedWinNotificationInput === null ? true : parseBooleanSetting(storedWinNotificationInput);
+    if (winNotificationInput) winNotificationInput.checked = win_notification_enable;
 
     if (storedSoundInput !== null) {
         sound_enable = parseBooleanSetting(storedSoundInput);
@@ -239,6 +248,18 @@ if (saveBtn) {
 
         if (avatarInput) {
             localStorage.setItem('win_avatar_enable', avatarInput.checked);
+        }
+
+        if (winNotificationInput) {
+            win_notification_enable = winNotificationInput.checked;
+            localStorage.setItem('win_notification_enable', win_notification_enable);
+
+            // Обновляем параметр URL, чтобы loadSettings() не отменил сохранённый выбор.
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('win_notification_enable')) {
+                url.searchParams.set('win_notification_enable', win_notification_enable ? '1' : '0');
+                window.history.replaceState(window.history.state, '', url);
+            }
         }
 
         if (soundInput) {
@@ -370,6 +391,13 @@ if (avatarInput) {
 
 if (soundInput) {
     soundInput.addEventListener("input", () => {
+        checkFormsValidity();
+    });
+}
+
+if (winNotificationInput) {
+    winNotificationInput.addEventListener("input", () => {
+        generateObsLink();
         checkFormsValidity();
     });
 }

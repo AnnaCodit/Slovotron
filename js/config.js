@@ -2,6 +2,7 @@
 let channel_name = '';
 let restart_time = 20;
 let win_avatar_enable = false;
+let win_notification_enable = true;
 let sound_enable = true;
 const DEFAULT_WIN_SOUND_URL = 'audio/slovotron-win.mp3';
 const WIN_SOUND_VOLUME = 0.3; // громкость победного звука: от 0 до 1
