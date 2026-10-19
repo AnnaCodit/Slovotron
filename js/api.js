@@ -333,6 +333,25 @@ function getActiveBackend() {
     return GAME_BACKENDS[game_backend] || GAME_BACKENDS.kontekstno;
 }
 
+async function sendWinNotification(win) {
+    try {
+        const response = await fetch('https://slovotron-backend.fra3a.ru/api/v1/wins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                channel_login: win.channel_login,
+                backend_id: win.backend_id,
+                word_id: win.word_id,
+                round_id: win.round_id,
+                winner_login: win.winner_login
+            })
+        });
+        if (!response.ok) return;
+    } catch {
+        // This is a best-effort notification and must not affect gameplay.
+    }
+}
+
 function backend_supports_tips() {
     return !!getActiveBackend().supportsTips;
 }

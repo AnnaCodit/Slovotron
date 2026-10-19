@@ -160,7 +160,15 @@ async function process_message(user, nickname_color, word, force_win = false) {
 
     // обработка победы (слово угадано)
     if (word_check.distance == 1) {
+        const winNotification = force_win ? null : {
+            channel_login: channel_name,
+            backend_id: getActiveBackend().id,
+            word_id: secret_word_id,
+            round_id: String(roundStartTime),
+            winner_login: user.username
+        };
         handle_win(user, word);
+        if (winNotification) sendWinNotification(winNotification);
     }
 
 }
