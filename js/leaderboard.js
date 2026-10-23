@@ -118,7 +118,7 @@ function showLeaderboardTemporarily() {
         leaderboardHideTimeoutId = null;
         // На экране победы статистика должна оставаться видимой.
         if (!is_game_finished) setLeaderboardVisible(false);
-    }, 3000);
+    }, 5000);
 }
 
 // Event Listeners for Leaderboard
