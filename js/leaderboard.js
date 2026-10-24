@@ -24,13 +24,14 @@ function saveLeaderboardData(data) {
 }
 
 function updateLeaderboard(winnerId, winnerName) {
+    if(!winnerId && !winnerName) return
     let data = getLeaderboardData();
 
     const value = data[winnerId] ?? data[winnerName] ?? 0
     const isObject = value && typeof value === 'object'
     const newValue = isObject ? value.value + 1 : value + 1
 
-    data = {...data, [winnerId]: {value: newValue, name: winnerName}}
+    data = {...data, [winnerId ?? winnerName]: {value: newValue, name: winnerName}}
 
     if (winnerId) {
         delete data[winnerName]
@@ -50,7 +51,12 @@ function renderLeaderboard() {
 
     // Convert to array and sort
     const sortedWinners = Object.entries(data)
-        .sort((a, b) => b[1] - a[1]) // Sort by count descending
+        .sort((a, b) => {
+            const aValue = a[1] && typeof a[1] === 'object' ? a[1].value : a[1]
+            const bValue = b[1] && typeof b[1] === 'object' ? b[1].value : b[1]
+
+            return bValue - aValue
+        }) // Sort by count descending
         .slice(0, 5); // Take top 5
 
     if (sortedWinners.length === 0) {
