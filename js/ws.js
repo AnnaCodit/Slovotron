@@ -255,7 +255,7 @@ function handle_win(winner_user, winning_word = '') {
     tip_menu_button.style.display = 'none';
 
     if (typeof updateLeaderboard === 'function') {
-        updateLeaderboard(winner_user['display-name']);
+        updateLeaderboard(winner_user['user-id'], winner_user['display-name']);
         const leaderboardSection = document.getElementById('leaderboard-statistic');
         if (leaderboardSection) leaderboardSection.style.display = 'flex';
     }
@@ -280,6 +280,7 @@ function handle_win(winner_user, winning_word = '') {
 
     sendWebhookEvent('game-win', {
         winner: {
+            id: winner_user['user-id'] || '',
             login: winner_user.username || '',
             display_name: winner_user['display-name'] || winner_user.username || ''
         },

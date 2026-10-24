@@ -23,13 +23,19 @@ function saveLeaderboardData(data) {
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data));
 }
 
-function updateLeaderboard(winnerName) {
+function updateLeaderboard(winnerId, winnerName) {
     let data = getLeaderboardData();
-    if (data[winnerName]) {
-        data = Object.assign({ [winnerName]: data[winnerName]++ }, data);
-    } else {
-        data = Object.assign({ [winnerName]: 1 }, data);
+
+    const value = data[winnerId] ?? data[winnerName] ?? 0
+    const isObject = value && typeof value === 'object'
+    const newValue = isObject ? value.value + 1 : value + 1
+
+    data = {...data, [winnerId]: {value: newValue, name: winnerName}}
+
+    if (winnerId) {
+        delete data[winnerName]
     }
+
     saveLeaderboardData(data);
     renderLeaderboard();
     renderStatistic();
@@ -53,8 +59,9 @@ function renderLeaderboard() {
     }
 
     sortedWinners.forEach((item, index) => {
-        const name = item[0];
-        const wins = item[1];
+        const isObject = item[1] && typeof item[1] === 'object' && 'name' in item[1]
+        const name = isObject ? item[1].name : item[0];
+        const wins = isObject ? item[1].value : item[1];
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'leaderboard-item';
@@ -103,7 +110,9 @@ function setLeaderboardVisible(isVisible) {
         renderLeaderboard();
         renderStatistic();
         lbStatRender = setInterval(function () {
-            if (is_game_finished) { clearInterval(lbStatRender) }
+            if (is_game_finished) {
+                clearInterval(lbStatRender)
+            }
             renderStatistic();
         }, 1000)
     }
@@ -137,12 +146,18 @@ for (const btn of resetLeaderboardBtns) {
     btn.addEventListener('click', resetLeaderboard);
 }
 
-function pad(val) { return val > 9 ? val : "0" + val; }
+function pad(val) {
+    return val > 9 ? val : "0" + val;
+}
 
 function renderStatistic() {
-    if (!is_game_finished) { winTime = Date.now() }
+    if (!is_game_finished) {
+        winTime = Date.now()
+    }
     let roundTime = Math.floor((winTime - roundStartTime) / 1000);
-    if (!roundTime) { roundTime = 0 }
+    if (!roundTime) {
+        roundTime = 0
+    }
     const roundTimeSec = pad(roundTime % 60);
     const roundTimeMin = pad(parseInt(roundTime / 60, 10));
     const roundTimeQt = roundTimeMin + ':' + roundTimeSec;
