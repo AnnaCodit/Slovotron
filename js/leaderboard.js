@@ -23,21 +23,29 @@ function saveLeaderboardData(data) {
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(data));
 }
 
-function updateLeaderboard(winnerId, winnerName) {
-    if(!winnerId && !winnerName) return
-    let data = getLeaderboardData();
-
-    const value = data[winnerId] ?? data[winnerName] ?? 0
-    const isObject = value && typeof value === 'object'
-    const newValue = isObject ? value.value + 1 : value + 1
-
-    data = {...data, [winnerId ?? winnerName]: {value: newValue, name: winnerName}}
+function updateLeaderboard(winnerId, winnerName, winnerLogin = '') {
+    const winnerKey = winnerId || winnerName;
+    if (!winnerKey) return;
+    const data = getLeaderboardData();
+    const keysToMerge = new Set([String(winnerKey)]);
 
     if (winnerId) {
-        delete data[winnerName]
+        const aliases = new Set([winnerName, winnerLogin].filter(Boolean).map(name => name.toLowerCase()));
+        for (const [key, entry] of Object.entries(data)) {
+            // Merge name-keyed records only; another player's ID must remain separate.
+            const isNameKey = typeof entry === 'number' || (entry && key === entry.name);
+            if (isNameKey && aliases.has(key.toLowerCase())) keysToMerge.add(key);
+        }
     }
 
-    saveLeaderboardData(data);
+    let wins = 1;
+    for (const key of keysToMerge) {
+        const entry = data[key];
+        const count = entry && typeof entry === 'object' ? entry.value : entry;
+        if (Number.isFinite(count)) wins += count;
+        delete data[key];
+    }
+    saveLeaderboardData({ ...data, [winnerKey]: { value: wins, name: winnerName } });
     renderLeaderboard();
     renderStatistic();
 }

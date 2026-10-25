@@ -255,7 +255,7 @@ function handle_win(winner_user, winning_word = '') {
     tip_menu_button.style.display = 'none';
 
     if (typeof updateLeaderboard === 'function') {
-        updateLeaderboard(winner_user['user-id'], winner_user['display-name']);
+        updateLeaderboard(winner_user['user-id'], winner_user['display-name'], winner_user.username);
         const leaderboardSection = document.getElementById('leaderboard-statistic');
         if (leaderboardSection) leaderboardSection.style.display = 'flex';
     }
