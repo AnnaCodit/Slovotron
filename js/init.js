@@ -1,18 +1,22 @@
+let streamerUser = null;
 
-
-function create_chat_connection(channel_name = '') {
+function create_chat_connection(channelName = '') {
 
     if (tmi_client) {
         tmi_client.disconnect().catch((err) => console.error('Error disconnecting:', err));
     }
 
     tmi_client = new tmi.Client({
-        channels: [channel_name]
+        channels: [channelName]
     });
 
     // Слушаем сообщения
     // user — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
     tmi_client.on('message', async (channel, user, message, self) => {
+
+        if (user.badges?.broadcaster && user.username?.toLowerCase() === channel_name.toLowerCase()) {
+            streamerUser = { ...streamerUser, ...user };
+        }
 
         // console.log(channel, user, message);
 
@@ -139,6 +143,7 @@ async function runQueue() {
 async function app() {
     try {
         setManualGuessReady(false);
+        streamerUser = null;
         const ready = loadSettings();
 
         if (ready) {
@@ -154,6 +159,13 @@ async function app() {
                 })
             ]);
 
+            if (twitchUser) {
+                streamerUser = {
+                    username: twitchUser.login || channel_name,
+                    'display-name': twitchUser.displayName || channel_name,
+                    'user-id': twitchUser.id
+                };
+            }
             secret_word_id = secretId;
             console.log('Ключ игры: ', secret_word_id);
             sendWebhookEvent('game-new', {
@@ -214,7 +226,9 @@ if (manualGuessForm && manualGuessInput) {
             return;
         }
 
-        const streamer = { username: channel_name, 'display-name': channel_name };
+        const streamer = streamerUser
+            ? { ...streamerUser }
+            : { username: channel_name, 'display-name': channel_name };
         const message = manualGuessInput.value;
 
         if (handle_tip_command(message, streamer.username)) {
