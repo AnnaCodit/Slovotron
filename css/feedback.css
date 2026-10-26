@@ -1,0 +1,188 @@
+#feedback-button {
+    position: fixed;
+    right: max(24px, env(safe-area-inset-right));
+    bottom: max(24px, env(safe-area-inset-bottom));
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    padding: 12px 18px;
+    border: 1px solid #454545;
+    border-radius: 100px;
+    background: #252525;
+    color: #e8e8e8;
+    font: inherit;
+    font-size: 16px;
+    box-shadow: 0 4px 20px #0005;
+}
+
+#feedback-button:hover {
+    border-color: #6b956b;
+    background: #2c352c;
+}
+
+#feedback-button svg,
+#feedback-close svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+#feedback-dialog {
+    width: min(480px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 28px;
+    overflow-y: auto;
+    border: 1px solid #424242;
+    border-radius: 20px;
+    background: #202020;
+    color: #f4f4f4;
+    font: inherit;
+    font-size: 16px;
+    box-shadow: 0 24px 80px #0009;
+    overscroll-behavior: contain;
+}
+
+#feedback-dialog::backdrop {
+    background: #000a;
+    backdrop-filter: blur(4px);
+}
+
+body:has(#feedback-dialog[open]) {
+    overflow: hidden;
+}
+
+.feedback-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+#feedback-title {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+#feedback-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: #303030;
+    color: #ccc;
+    box-shadow: none;
+}
+
+#feedback-description {
+    margin-bottom: 24px;
+    color: #bdbdbd;
+    line-height: 1.6;
+}
+
+#feedback-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+#feedback-message {
+    display: block;
+    width: 100%;
+    min-height: 150px;
+    padding: 14px;
+    resize: vertical;
+    border: 1px solid #494949;
+    border-radius: 10px;
+    background: #181818;
+    color: #f4f4f4;
+    font: inherit;
+    line-height: 1.5;
+}
+
+#feedback-message::placeholder {
+    color: #858585;
+}
+
+#feedback-button:focus-visible,
+#feedback-close:focus-visible,
+#feedback-submit:focus-visible,
+#feedback-message:focus-visible {
+    outline: 2px solid #8ebd8e;
+    outline-offset: 3px;
+}
+
+.feedback-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+    color: #999;
+    font-size: 12px;
+}
+
+#feedback-counter {
+    font-variant-numeric: tabular-nums;
+}
+
+#feedback-status {
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+#feedback-status:empty {
+    display: none;
+}
+
+#feedback-status[data-state="success"] {
+    color: #a3d9a3;
+}
+
+#feedback-status[data-state="error"] {
+    color: #ffb2a9;
+}
+
+#feedback-submit {
+    margin-top: 20px;
+    border-radius: 10px;
+    background: #246b35;
+    font: inherit;
+    font-weight: 500;
+}
+
+#feedback-submit:disabled {
+    background: #333;
+    color: #999;
+    cursor: default;
+    transform: none;
+    filter: none;
+}
+
+.obs-overlay #feedback-button {
+    display: none;
+}
+
+@media (max-width: 550px) {
+    #feedback-button {
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    #feedback-dialog {
+        padding: 20px;
+    }
+
+    #feedback-title {
+        font-size: 22px;
+    }
+}

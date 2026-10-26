@@ -109,6 +109,7 @@
     <link rel="stylesheet" href="css/settings.css?v=__ASSETS_VERSION__">
     <link rel="stylesheet" href="css/leaderboard.css?v=__ASSETS_VERSION__">
     <link rel="stylesheet" href="css/tips.css?v=__ASSETS_VERSION__">
+    <link rel="stylesheet" href="css/feedback.css?v=__ASSETS_VERSION__">
     <!-- Система отслеживания ошибок фронтэнда Sentry. В будущем можно попробовать еще LogRocket -->
     <script src="https://js.sentry-cdn.com/d96be4f9b0094010cb3a23e45d5e4bf6.min.js" crossorigin="anonymous"></script>
     <!-- Взаимодействие с твичом -->
@@ -250,8 +251,7 @@
                 <div class="setting">
                     <div class="title">
                         <span>Оверлей для OBS</span>
-                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                             <path fill="currentColor"
                                 d="M288 64C252.7 64 224 92.7 224 128L224 384C224 419.3 252.7 448 288 448L480 448C515.3 448 544 419.3 544 384L544 183.4C544 166 536.9 149.3 524.3 137.2L466.6 81.8C454.7 70.4 438.8 64 422.3 64L288 64zM160 192C124.7 192 96 220.7 96 256L96 512C96 547.3 124.7 576 160 576L352 576C387.3 576 416 547.3 416 512L416 496L352 496L352 512L160 512L160 256L176 256L176 192L160 192z" />
                         </svg>
@@ -350,6 +350,34 @@
     <footer class="tech-things">
         <span id="remove-test-user-from-leaderboard" title="удалить тестового пользователя из таблицы лидеров">.</span>
     </footer>
+    <button type="button" id="feedback-button" aria-haspopup="dialog" aria-controls="feedback-dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2v-10a9 9 0 0 1 18 0Z" stroke-linejoin="round" />
+            <path d="M7 11h8M7 15h5" stroke-linecap="round" />
+        </svg> Обратная связь </button>
+    <dialog id="feedback-dialog" aria-labelledby="feedback-title" aria-describedby="feedback-description">
+        <div class="feedback-heading">
+            <h2 id="feedback-title">Обратная связь</h2>
+            <button type="button" id="feedback-close" aria-label="Закрыть окно обратной связи">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                    <path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+        <p id="feedback-description">Буду рада любой обратной связи, критике и предложениям.</p>
+        <form id="feedback-form">
+            <label for="feedback-message">Ваше сообщение</label>
+            <textarea id="feedback-message" name="message" rows="6" maxlength="3000"
+                placeholder="Что понравилось? Что можно улучшить?" aria-describedby="feedback-limit" required
+                autofocus></textarea>
+            <div class="feedback-meta">
+                <span id="feedback-limit">До 3000 символов</span>
+                <span id="feedback-counter" aria-hidden="true">0 / 3000</span>
+            </div>
+            <p id="feedback-status" role="status" aria-live="polite" aria-atomic="true"></p>
+            <button type="submit" id="feedback-submit" disabled>Отправить</button>
+        </form>
+    </dialog>
     <!-- Все основные скрипты -->
     <script src="js/config.js?v=__ASSETS_VERSION__"></script>
     <script src="js/api.js?v=__ASSETS_VERSION__"></script>
@@ -361,6 +389,7 @@
     <script src="js/leaderboard.js?v=__ASSETS_VERSION__"></script>
     <script src="js/tips.js?v=__ASSETS_VERSION__"></script>
     <script src="js/confetti.js?v=__ASSETS_VERSION__"></script>
+    <script src="js/feedback.js?v=__ASSETS_VERSION__"></script>
     <script src="js/init.js?v=__ASSETS_VERSION__"></script>
     <script src="js/analytics.js?v=__ASSETS_VERSION__"></script>
 </body>
