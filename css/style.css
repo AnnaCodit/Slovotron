@@ -197,6 +197,10 @@ section {
     animation: openMsg 0.2s ease-out forwards;
 }
 
+.guessing .msg.repeated .distance {
+    color: #b1b1b1;
+}
+
 .guessing .msg .msg-content {
     /* overflow: hidden; */
     /* Скрываем то, что не влезает при анимации. Потенциально наличие overflow правильнее, но я тестила оба варианта и не заметила разницы.. мб вернуться к этому в будущем. */

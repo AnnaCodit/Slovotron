@@ -40,13 +40,14 @@ function addTextToLastWords(text = '') {
     addAnythingToLastWords(html);
 }
 
-function addWordStatusToLastWords(word = '', status = '') {
+function addWordStatusToLastWords(word = '', status = '', { distance, repeated = false } = {}) {
     const banword_class = is_banword(word) ? ' banword' : '';
     const html = `
-        <div class="msg${banword_class}">
+        <div class="msg${repeated ? ' repeated' : ''}${banword_class}">
             <div class="msg-content">
                 <div class="word-and-distance">
                     <div class="word">${render_word_html(word)} ${status}</div>
+                    ${distance ? `<div class="distance">${distance}</div>` : ''}
                 </div>
             </div>
         </div>`;
@@ -87,7 +88,8 @@ async function process_message(user, nickname_color, word, force_win = false) {
 
     // Проверяем, есть ли слово в списке
     if (checked_words.has(word)) {
-        if (checked_words.get(word).distance) {
+        const distance = checked_words.get(word).distance;
+        if (distance) {
             if (!uniqUsers.has(user.username)) {
                 uniqUsers.add(user.username);
                 emit('uniqueGuessersAmountChanged');
@@ -95,7 +97,7 @@ async function process_message(user, nickname_color, word, force_win = false) {
             repeatWords++;
         }
         // добавить слово в колонку .guessing .last-words в верх списка
-        addWordStatusToLastWords(word, 'уже было использовано');
+        addWordStatusToLastWords(word, 'уже было', { distance, repeated: true });
         // console.log(`Слово "${word}" уже было проверено.`);
         return;
     }
