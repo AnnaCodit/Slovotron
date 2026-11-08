@@ -140,6 +140,10 @@ function loadSettings() {
         document.body.classList.add('obs-overlay');
     }
 
+    if (urlParams.get('transparent_background') === '1') {
+        document.body.style.backgroundColor = 'transparent';
+    }
+
     webhook_url = (urlParams.get('webhook_url') || '').trim();
     webhook_secret = (urlParams.get('webhook_secret') || '').trim();
 
