@@ -61,7 +61,7 @@ function create_chat_connection(channelName = '') {
             return;
         }
 
-        if (isModerator && (command.startsWith('!sres') || command.startsWith('!словотрон-рес') || command.startsWith('!слв-рес'))) {
+        if (isModerator && (command.startsWith('!sres') || command.startsWith('!словотрон-рестарт') || command.startsWith('!слв-рестарт') || command.startsWith('!слв-рес'))) {
             await start_new_round();
             return;
         }
