@@ -388,35 +388,41 @@ async function get_tip(gameId, lastRank) {
     return backend.tip(gameId, lastRank);
 }
 
-async function generate_secret_word() {
+async function generate_secret_word(shouldContinue = () => true) {
     const backend = getActiveBackend();
     let retry_count = 0;
     const max_retries = 5;
 
     while (retry_count < max_retries) {
+        if (!shouldContinue()) return null;
         try {
             const game = await backend.createGame();
+            if (!shouldContinue()) return null;
+            if (!game?.gameId) {
+                throw new Error('Бэкенд не вернул ID игры');
+            }
             current_secret_word_data = {
                 challenge_id: game.gameId,
                 secret_word: game.secretWord ?? null
             };
             return game.gameId;
         } catch (e) {
+            if (!shouldContinue()) return null;
             console.warn(`Не удалось создать игру (${backend.id}). Попытка ${retry_count + 1}/${max_retries}:`, e);
 
             // Ошибки настроек не исправятся повторным запросом.
-            if (e.userMessage) {
-                show_fullscreen_error(e.userMessage);
+            if (e?.userMessage) {
                 throw e;
             }
 
             retry_count++;
+            if (retry_count >= max_retries) break;
             // Небольшая пауза перед повтором при сетевой ошибке
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
-    show_fullscreen_error('Ошибка получения секретного слова.<br>Пожалуйста, попробуйте зайти позже.');
+    if (!shouldContinue()) return null;
     throw new Error('Превышено количество попыток получения секретного слова.');
 }
 
@@ -444,8 +450,13 @@ function show_fullscreen_error(message) {
 
 async function getTwitchUserData(username) {
     if (!username) return null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     try {
-        const response = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(username)}`);
+        const response = await fetch(
+            `https://api.ivr.fi/v2/twitch/user?login=${encodeURIComponent(username)}`,
+            { signal: controller.signal }
+        );
         if (!response.ok) {
             console.warn(`Twitch user API error: HTTP ${response.status}`);
             return null;
@@ -459,6 +470,8 @@ async function getTwitchUserData(username) {
         }
     } catch (error) {
         console.warn("Ошибка запроса к api.ivr.fi user API:", error);
+    } finally {
+        clearTimeout(timeoutId);
     }
     return null;
 }

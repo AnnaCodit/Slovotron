@@ -1,18 +1,27 @@
 let streamerUser = null;
+let app_init_gen = 0;
+
+function disconnect_chat_connection() {
+    if (tmi_client) {
+        const prevClient = tmi_client;
+        tmi_client = null;
+        prevClient.disconnect().catch((err) => console.error('Error disconnecting:', err));
+    }
+}
 
 function create_chat_connection(channelName = '') {
 
-    if (tmi_client) {
-        tmi_client.disconnect().catch((err) => console.error('Error disconnecting:', err));
-    }
+    disconnect_chat_connection();
 
-    tmi_client = new tmi.Client({
+    const client = new tmi.Client({
         channels: [channelName]
     });
+    tmi_client = client;
 
     // Слушаем сообщения
     // user — это объект со всей инфой (цвет ника, бейджи, id сообщения и т.д.)
-    tmi_client.on('message', async (channel, user, message, self) => {
+    client.on('message', async (channel, user, message, self) => {
+        if (client !== tmi_client) return;
 
         if (user.badges?.broadcaster && user.username?.toLowerCase() === channel_name.toLowerCase()) {
             streamerUser = { ...streamerUser, ...user };
@@ -34,35 +43,26 @@ function create_chat_connection(channelName = '') {
             user.badges?.lead_moderator ||
             user.badges?.moderator;
 
-        const command = message.toLowerCase();
-        if (['!слв-топ', '!словотрон-топ'].includes(command.trim())) {
+        const command = message.trim().toLowerCase();
+        if (['!слв-топ', '!словотрон-топ'].includes(command)) {
             showLeaderboardTemporarily();
             return;
         }
 
         const moderatorTipCommands = [
             '!словотрон-подсказка',
-            '!слв-рестарт',
+            '!слв-подсказка',
             '!slovotron-hint',
             '!slv-hint'
         ];
 
-        if (isModerator && !is_game_finished && moderatorTipCommands.includes(command.trim())) {
+        if (isModerator && !is_game_finished && moderatorTipCommands.includes(command)) {
             if (backend_supports_tips()) use_tip(user['username'], true);
             return;
         }
 
-        if (isModerator && !is_game_finished && (command.startsWith('!sres') || command.startsWith('!словотрон-рес'))) {
-            is_game_finished = true;
-            setManualGuessReady(false);
-            secret_word_id = await generate_secret_word();
-            reset_round();
-            sendWebhookEvent('game-new', {
-                challenge_id: secret_word_id,
-                secret_word: current_secret_word_data?.secret_word || null
-            });
-            is_game_finished = false;
-            setManualGuessReady(true);
+        if (isModerator && (command.startsWith('!sres') || command.startsWith('!словотрон-рес') || command.startsWith('!слв-рес'))) {
+            await start_new_round();
             return;
         }
 
@@ -75,7 +75,7 @@ function create_chat_connection(channelName = '') {
     });
 
     // Подключаемся
-    return tmi_client.connect();
+    return client.connect();
 }
 
 function handle_tip_command(message = '', username = '') {
@@ -109,6 +109,7 @@ function normalize_guess(message = '') {
 }
 
 function enqueue_guess(user, color, message) {
+    if (is_game_finished) return false;
     const normalizedMessage = normalize_guess(message);
     if (!normalizedMessage) return false;
 
@@ -117,7 +118,9 @@ function enqueue_guess(user, color, message) {
         document.getElementById('info').style.display = 'none';
         document.getElementById('settings').style.display = 'none';
     }
-    wordQueue.push({ 'user': user, 'color': color, 'msg': normalizedMessage });
+    const gameId = typeof secret_word_id !== 'undefined' ? secret_word_id : '';
+    const roundGen = typeof round_start_gen === 'number' ? round_start_gen : 0;
+    wordQueue.push({ 'user': user, 'color': color, 'msg': normalizedMessage, 'gameId': gameId, 'roundGen': roundGen });
     if (wordQueue.length === 1) {
         runQueue();
     }
@@ -128,9 +131,9 @@ async function runQueue() {
     // Always shift the processed item, even if process_message throws.
     // Otherwise the queue stalls forever and chat messages stop being handled.
     while (wordQueue.length > 0) {
-        const { user, color, msg } = wordQueue[0];
+        const { user, color, msg, gameId, roundGen } = wordQueue[0];
         try {
-            await process_message(user, color, msg);
+            await process_message(user, color, msg, false, gameId, roundGen);
         } catch (e) {
             console.error('process_message failed:', e);
         } finally {
@@ -141,23 +144,26 @@ async function runQueue() {
 
 // basic app init
 async function app() {
+    const currentAppGen = ++app_init_gen;
     try {
+        disconnect_chat_connection();
         setManualGuessReady(false);
         streamerUser = null;
         const ready = loadSettings();
 
         if (ready) {
-
-            reset_round();
-
             // получение секретного слова и данных стримера параллельно
-            const [secretId, twitchUser] = await Promise.all([
-                generate_secret_word(),
+            const roundPromise = start_new_round({ openRound: false });
+            const expectedRoundGen = typeof round_start_gen === 'number' ? round_start_gen : 0;
+            const [roundStarted, twitchUser] = await Promise.all([
+                roundPromise,
                 getTwitchUserData(channel_name).catch(e => {
                     console.warn('Не удалось получить данные стримера для аналитики:', e);
                     return null;
                 })
             ]);
+
+            if (currentAppGen !== app_init_gen) return;
 
             if (twitchUser) {
                 streamerUser = {
@@ -166,41 +172,53 @@ async function app() {
                     'user-id': twitchUser.id
                 };
             }
-            secret_word_id = secretId;
-            console.log('Ключ игры: ', secret_word_id);
-            sendWebhookEvent('game-new', {
-                challenge_id: secret_word_id,
-                secret_word: current_secret_word_data?.secret_word || null
-            });
-            setManualGuessReady(true);
+
+            if (roundStarted) {
+                open_prepared_round(expectedRoundGen);
+            }
 
             // подключение к чату твича и начало получения сообщений
             await create_chat_connection(channel_name).catch(e => {
                 console.warn('Не удалось дождаться подключения к чату Twitch:', e);
             });
 
-            // TwitchTracker считает средний онлайн за последние 30 дней.
-            // Получаем его один раз за игровую сессию, после подключения к чату.
-            const twitchTrackerSummary = await getTwitchTrackerChannelSummary(channel_name);
+            if (currentAppGen !== app_init_gen || !roundStarted) return;
 
-            // отправка данных об использовании игры в аналитику
-            const is_obs = document.body.classList.contains('obs-overlay') ? 1 : 0;
-            const startParams = {
-                channel_name: channel_name,
-                followers: typeof twitchUser?.followers === 'number' ? twitchUser.followers : 0,
-                chatterCount: typeof twitchUser?.chatterCount === 'number' ? twitchUser.chatterCount : 0,
-                is_obs: is_obs,
-                game_backend: game_backend
-            };
+            try {
+                // TwitchTracker считает средний онлайн за последние 30 дней.
+                // Получаем его один раз за игровую сессию, после подключения к чату.
+                const twitchTrackerSummary = await getTwitchTrackerChannelSummary(channel_name);
 
-            if (typeof twitchTrackerSummary?.avg_viewers === 'number') {
-                startParams.avg_viewers = twitchTrackerSummary.avg_viewers;
+                if (currentAppGen !== app_init_gen) return;
+
+                // отправка данных об использовании игры в аналитику
+                const is_obs = document.body.classList.contains('obs-overlay') ? 1 : 0;
+                const startParams = {
+                    channel_name: channel_name,
+                    followers: typeof twitchUser?.followers === 'number' ? twitchUser.followers : 0,
+                    chatterCount: typeof twitchUser?.chatterCount === 'number' ? twitchUser.chatterCount : 0,
+                    is_obs: is_obs,
+                    game_backend: game_backend
+                };
+
+                if (typeof twitchTrackerSummary?.avg_viewers === 'number') {
+                    startParams.avg_viewers = twitchTrackerSummary.avg_viewers;
+                }
+
+                if (typeof analytics_set_visit_params === 'function') {
+                    analytics_set_visit_params(startParams);
+                }
+                if (typeof analytics_reach_goal === 'function') {
+                    analytics_reach_goal('game_start', startParams);
+                }
+            } catch (analyticsError) {
+                console.warn('Не удалось отправить события аналитики:', analyticsError);
             }
 
-            analytics_set_visit_params(startParams);
-            analytics_reach_goal('game_start', startParams);
-
         } else {
+            if (typeof cancel_round_restart_timers === 'function') cancel_round_restart_timers();
+            if (typeof round_start_gen === 'number') round_start_gen++;
+            is_game_finished = true;
             setManualGuessReady(false);
             document.getElementById('settings').style.display = 'block';
             if (game_backend === 'wordgun') loadWordgunOptions();

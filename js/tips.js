@@ -2,7 +2,7 @@ let tip_requests_users = new Set();
 let tip_last_reset_time = Date.now();
 let tip_cooldown_time = 1000 * 60 * 1;
 let tip_in_progress = false; // пока подсказка выдаётся — повторные вызовы игнорируем
-let tip_distance_tune_multiplier = 1.5; // механика подсказок такова что апишка контекстно дает слово вдвое ближе чем last_word_rank. мультипликатор нужен чтобы это поправить как нам надо. например: лучшая дистанция 100, мультипликатор 1.5, подсказка даст дальность 75 вместо 50.
+let tip_reset_timeout_id = null;
 const tip_menu_button = document.getElementById('menu-button-tip');
 
 const tip_progress_fill = document.getElementById('tip-progress-fill');
@@ -77,15 +77,22 @@ async function use_tip(user = '', force = false) {
     // The hint request is built per-backend: kontekstno applies its own multiplier,
     // wordgun uses best_found_distance directly as best_rank.
     const tip_game_id = secret_word_id;
+    const tip_round_gen = typeof round_start_gen === 'number' ? round_start_gen : 0;
+    const isDifferentRound = () => secret_word_id !== tip_game_id
+        || (typeof round_start_gen === 'number' && round_start_gen !== tip_round_gen);
     let tip_word;
     try {
         tip_word = await get_tip(tip_game_id, best_found_distance);
     } catch (e) {
         console.error('tip query failed', e);
+        if (isDifferentRound()) return;
         abort_tip();
         return;
     }
-    if (is_game_finished || secret_word_id !== tip_game_id) {
+    if (isDifferentRound()) {
+        return;
+    }
+    if (is_game_finished) {
         abort_tip();
         return;
     }
@@ -102,17 +109,20 @@ async function use_tip(user = '', force = false) {
         return;
     }
     console.log('tip_word:', tip_word);
-    best_found_distance = tip_word.distance; // обновляем текущую лучшую дальность
+    best_found_distance = Math.min(best_found_distance, tip_word.distance); // обновляем текущую лучшую дальность
     console.log('best_found_distance after tip:', best_found_distance);
     hints_used++;
 
     // Wait a bit for animation to show before resetting/hiding
-    setTimeout(() => {
-        tip_progress_bar.classList.remove('tip-activated');
+    clearTimeout(tip_reset_timeout_id);
+    tip_reset_timeout_id = setTimeout(() => {
+        tip_reset_timeout_id = null;
+        tip_progress_bar?.classList?.remove('tip-activated');
         reset_tips();
     }, 800);
 
-    checked_words.set(tip_word.word, { distance: tip_word.distance });
+    const normalized_tip_word = String(tip_word.word || '').trim().toLowerCase().replace(/ё/g, 'е');
+    checked_words.set(normalized_tip_word, { distance: tip_word.distance });
     const new_message = message_template(tip_word.word, tip_word.distance, '💡 Подсказка', '#DDD');
     addAnythingToLastWords(new_message);
     addMatchWord(new_message, tip_word.distance);
@@ -132,6 +142,9 @@ async function use_tip(user = '', force = false) {
 }
 
 function reset_tips() {
+    clearTimeout(tip_reset_timeout_id);
+    tip_reset_timeout_id = null;
+    tip_progress_bar?.classList?.remove('tip-activated');
     tip_requests_users.clear(); // очищаем список пользователей которые использовали подсказку
     tip_last_reset_time = Date.now(); // обновляем время последнего использования подсказки
     tip_in_progress = false;
@@ -140,7 +153,9 @@ function reset_tips() {
 
 // откат при ошибке: снимаем guard и чистим голоса, чтобы можно было переспросить. кулдаун не трогаем
 function abort_tip() {
-    tip_progress_bar.classList.remove('tip-activated');
+    clearTimeout(tip_reset_timeout_id);
+    tip_reset_timeout_id = null;
+    tip_progress_bar?.classList?.remove('tip-activated');
     tip_in_progress = false;
     tip_requests_users.clear();
     update_tip_progress();

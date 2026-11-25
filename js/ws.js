@@ -1,5 +1,10 @@
 const last_words_container = document.querySelector('.guessing .last-words');
 const best_match_container = document.querySelector('.guessing .best-match');
+const ROUND_RETRY_BASE_MS = 15000;
+const ROUND_RETRY_MAX_MS = 60000;
+let round_start_gen = 0;
+let round_retry_timeout_id = null;
+let round_retry_attempt = 0;
 
 const emit = (name, data) => document.dispatchEvent(new CustomEvent(name, { detail: data }));
 const isObsOverlayMode = () => document.body.classList.contains('obs-overlay');
@@ -77,9 +82,20 @@ function getDistanceColor(distance) {
 }
 
 
-async function process_message(user, nickname_color, word, force_win = false) {
+async function process_message(
+    user,
+    nickname_color,
+    word,
+    force_win = false,
+    expected_game_id = (typeof secret_word_id !== 'undefined' ? secret_word_id : ''),
+    expected_round_gen = round_start_gen
+) {
+    const gameId = expected_game_id;
+    const isStaleRound = () => is_game_finished
+        || (typeof secret_word_id !== 'undefined' ? secret_word_id : '') !== gameId
+        || round_start_gen !== expected_round_gen;
 
-    if (is_game_finished) return;
+    if (isStaleRound()) return;
 
     // перевод слова в нижний регистр
     word = word.toLowerCase();
@@ -112,12 +128,15 @@ async function process_message(user, nickname_color, word, force_win = false) {
         if (force_win) {
             word_check = { distance: 1 };
         } else {
-            word_check = await score_word(word, secret_word_id);
+            word_check = await score_word(word, gameId);
         }
     } catch (err) {
+        if (isStaleRound()) return;
         // Any guess error can mean the game itself is gone (an expired token, for
         // one), so ask the backend — the report stays the same either way.
-        if (await backend_game_is_live(secret_word_id) === false) {
+        const isLive = await backend_game_is_live(gameId);
+        if (isStaleRound()) return;
+        if (isLive === false) {
             console.warn('Игра больше не существует на сервере.');
             addWordStatusToLastWords(word, 'Ошибка: Игра больше не существует.');
             return;
@@ -126,6 +145,8 @@ async function process_message(user, nickname_color, word, force_win = false) {
         addWordStatusToLastWords(word, 'ошибка API');
         return;
     }
+
+    if (isStaleRound()) return;
 
     checked_words.set(word, { distance: word_check.distance });
 
@@ -328,6 +349,7 @@ function handle_win(winner_user, winning_word = '') {
 
         const restartTime = Date.now() + (restart_time * 1000);
 
+        if (typeof menuTimerId !== 'undefined') clearInterval(menuTimerId);
         menuTimerId = setInterval(async () => {
             let sec = Math.floor((restartTime - Date.now()) / 1000);
             if (Date.now() > restartTime) {
@@ -343,26 +365,99 @@ function handle_win(winner_user, winning_word = '') {
 
 }
 
-async function resetRoundTimeout(time) {
-    resetRoundTimeoutId = setTimeout(async () => {
-        try {
-            secret_word_id = await generate_secret_word();
-            sendWebhookEvent('game-new', {
-                challenge_id: secret_word_id,
-                secret_word: current_secret_word_data?.secret_word || null
-            });
-        } catch (e) {
-            console.error(e);
+function cancel_round_restart_timers() {
+    if (typeof resetRoundTimeoutId !== 'undefined') clearTimeout(resetRoundTimeoutId);
+    if (typeof menuTimerId !== 'undefined') clearInterval(menuTimerId);
+    clearTimeout(round_retry_timeout_id);
+    resetRoundTimeoutId = undefined;
+    menuTimerId = undefined;
+    round_retry_timeout_id = null;
+    resetTimerPaused = false;
+}
+
+function open_prepared_round(expectedGen) {
+    if (expectedGen !== round_start_gen) return false;
+    is_game_finished = false;
+    setManualGuessReady(true);
+    return true;
+}
+
+async function start_new_round({ openRound = true, isAutoRetry = false } = {}) {
+    const gen = ++round_start_gen;
+    cancel_round_restart_timers();
+    if (!isAutoRetry) {
+        round_retry_attempt = 0;
+    }
+    if (typeof stop_confetti === 'function') stop_confetti();
+    is_game_finished = true;
+    setManualGuessReady(false);
+
+    const menuTimer = document.getElementById('menu-timer');
+    if (menuTimer) menuTimer.style.display = 'none';
+    const restartBtn = document.getElementById('menu-button-restart');
+    if (restartBtn) restartBtn.style.display = 'none';
+
+    let newSecretId;
+    try {
+        newSecretId = await generate_secret_word(() => gen === round_start_gen);
+    } catch (e) {
+        console.error(e);
+        if (gen !== round_start_gen) return false;
+        if ((!isAutoRetry || e?.userMessage) && typeof show_fullscreen_error === 'function') {
+            show_fullscreen_error(
+                e?.userMessage || 'Ошибка получения секретного слова.<br>Пожалуйста, попробуйте зайти позже.'
+            );
         }
+        const btn = document.getElementById('menu-button-restart');
+        if (btn) btn.style.display = 'block';
+        // Периодический авто-повтор при временных сбоях API (автономный OBS / ночной стрим).
+        // Ошибки настроек (e.userMessage) сами не пройдут, для них авто-повтор не ставим.
+        if (!e?.userMessage) {
+            const retryDelay = Math.min(ROUND_RETRY_BASE_MS * (2 ** round_retry_attempt), ROUND_RETRY_MAX_MS);
+            round_retry_attempt++;
+            round_retry_timeout_id = setTimeout(() => {
+                round_retry_timeout_id = null;
+                if (gen !== round_start_gen) return;
+                start_new_round({ isAutoRetry: true });
+            }, retryDelay);
+        }
+        return false;
+    }
 
-        reset_round();
-        document.getElementById('winner').style.display = 'none';
+    if (gen !== round_start_gen || !newSecretId) return false;
 
+    round_retry_attempt = 0;
+    document.querySelector('.error-overlay')?.remove?.();
+
+    secret_word_id = newSecretId;
+    console.log('Ключ игры: ', secret_word_id);
+    reset_round();
+
+    const winnerBlock = document.getElementById('winner');
+    if (winnerBlock) winnerBlock.style.display = 'none';
+    if (typeof setLeaderboardVisible === 'function') {
+        setLeaderboardVisible(false);
+    } else {
         const leaderboardSection = document.getElementById('leaderboard-statistic');
         if (leaderboardSection) leaderboardSection.style.display = 'none';
+    }
 
+    sendWebhookEvent('game-new', {
+        challenge_id: secret_word_id,
+        secret_word: current_secret_word_data?.secret_word || null
+    });
+
+    if (openRound) {
         is_game_finished = false;
         setManualGuessReady(true);
+    }
+    return true;
+}
+
+function resetRoundTimeout(time) {
+    if (typeof resetRoundTimeoutId !== 'undefined') clearTimeout(resetRoundTimeoutId);
+    resetRoundTimeoutId = setTimeout(() => {
+        start_new_round();
     }, time);
 }
 
@@ -393,9 +488,7 @@ document.getElementById('menu-button-info').addEventListener('click', () => {
 });
 
 document.getElementById('menu-button-restart').addEventListener('click', () => {
-    resetRoundTimeout(0);
-    document.getElementById('menu-button-restart').style.display = 'none';
-    resetTimerPaused = false;
+    start_new_round();
 });
 
 document.getElementById('menu-timer').addEventListener('click', () => {
@@ -404,8 +497,8 @@ document.getElementById('menu-timer').addEventListener('click', () => {
     if (is_game_finished) {
         menuTimer.style.display = 'none';
         menuRestartButton.style.display = 'block';
-        clearTimeout(resetRoundTimeoutId);
-        clearInterval(menuTimerId);
+        if (typeof resetRoundTimeoutId !== 'undefined') clearTimeout(resetRoundTimeoutId);
+        if (typeof menuTimerId !== 'undefined') clearInterval(menuTimerId);
         resetTimerPaused = true;
     }
 });

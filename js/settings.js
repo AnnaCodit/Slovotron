@@ -13,7 +13,39 @@ const backendWarning = document.getElementById('backend-warning');
 const wordgunDifficultyInput = document.getElementById('wordgun-difficulty');
 const wordgunSettingBlocks = document.querySelectorAll('.wordgun-setting');
 let validationTimeout;
+let validationSeq = 0;
 let wordgunOptionsLoaded = false;
+const CUSTOM_CSS_LINK_ID = 'custom-css-file';
+const FORM_URL_PARAMS = [
+    'channel',
+    'channel_name',
+    'restart_time',
+    'win_sound_url',
+    'win_avatar_enable',
+    'win_notification_enable',
+    'sound_enable',
+    'backend',
+    'wg_difficulty'
+];
+
+function clearFormUrlParams() {
+    if (!window.history || typeof window.history.replaceState !== 'function') return;
+    try {
+        const url = new URL(window.location.href);
+        let changed = false;
+        for (const param of FORM_URL_PARAMS) {
+            if (url.searchParams.has(param)) {
+                url.searchParams.delete(param);
+                changed = true;
+            }
+        }
+        if (changed) {
+            window.history.replaceState(window.history.state, '', url.href);
+        }
+    } catch (e) {
+        console.warn('Не удалось очистить параметры формы из URL:', e);
+    }
+}
 
 function parseBooleanSetting(value) {
     return String(value).toLowerCase() === 'true' || String(value) === '1';
@@ -114,12 +146,18 @@ function loadSettings() {
             }
 
             const cssUrl = new URL(urlString, window.location.href);
-            cssUrl.searchParams.set('slv_timestamp', Date.now());
-
-            const linkElement = document.createElement('link');
-            linkElement.rel = 'stylesheet';
-            linkElement.href = cssUrl.href;
-            document.head.appendChild(linkElement);
+            const existingLink = document.getElementById(CUSTOM_CSS_LINK_ID);
+            if (!existingLink || existingLink.dataset?.cssSource !== cssUrl.href) {
+                const linkElement = existingLink || document.createElement('link');
+                linkElement.id = CUSTOM_CSS_LINK_ID;
+                linkElement.rel = 'stylesheet';
+                if (linkElement.dataset) linkElement.dataset.cssSource = cssUrl.href;
+                cssUrl.searchParams.set('slv_timestamp', Date.now());
+                linkElement.href = cssUrl.href;
+                if (!existingLink) {
+                    document.head.appendChild(linkElement);
+                }
+            }
         } catch (e) {
             console.error(`Некорректный URL в параметре cssFile: "${cssFile}"`, e);
         }
@@ -167,7 +205,7 @@ function loadSettings() {
         localStorage.setItem('channel_name', urlChannel);
     }
     const storedChannel = urlChannel || localStorage.getItem('channel_name');
-    const storedRestartTime = urlParams.get('restart_time') || localStorage.getItem('restart_time');
+    const storedRestartTime = getSettingValue(urlParams, 'restart_time', 'restart_time');
     const storedWinSoundUrl = getSettingValue(urlParams, 'win_sound_url', 'win_sound_url');
     const storedAvatarInput = getSettingValue(urlParams, 'win_avatar_enable', 'win_avatar_enable');
     const storedWinNotificationInput = getSettingValue(urlParams, 'win_notification_enable', 'win_notification_enable');
@@ -179,7 +217,7 @@ function loadSettings() {
         if (channelInput) channelInput.value = channel_name;
     }
 
-    if (storedRestartTime) {
+    if (storedRestartTime !== null && storedRestartTime !== '') {
         const parsed = parseInt(storedRestartTime, 10);
         if (Number.isFinite(parsed) && parsed >= 0) {
             restart_time = parsed;
@@ -211,7 +249,7 @@ function loadSettings() {
     }
     updateManualGuessVisibility();
 
-    const storedBackend = urlParams.get('backend') || localStorage.getItem('game_backend');
+    const storedBackend = getSettingValue(urlParams, 'backend', 'game_backend');
     if (storedBackend && GAME_BACKENDS[storedBackend]) {
         game_backend = storedBackend;
     }
@@ -237,12 +275,20 @@ function loadSettings() {
 
 if (saveBtn) {
     saveBtn.addEventListener('click', () => {
-        if (channelInput && channelInput.value) {
+        clearTimeout(validationTimeout);
+        validationSeq++;
+        if (channelInput && channelInput.value.trim()) {
             localStorage.setItem('channel_name', channelInput.value.trim());
         }
 
-        if (restartInput && restartInput.value) {
-            localStorage.setItem('restart_time', restartInput.value.trim());
+        if (restartInput) {
+            const restartValue = restartInput.value.trim();
+            if (restartValue) {
+                localStorage.setItem('restart_time', restartValue);
+            } else {
+                localStorage.removeItem('restart_time');
+                restart_time = 20;
+            }
         }
 
         if (winSoundUrlInput) {
@@ -257,13 +303,6 @@ if (saveBtn) {
         if (winNotificationInput) {
             win_notification_enable = winNotificationInput.checked;
             localStorage.setItem('win_notification_enable', win_notification_enable);
-
-            // Обновляем параметр URL, чтобы loadSettings() не отменил сохранённый выбор.
-            const url = new URL(window.location.href);
-            if (url.searchParams.has('win_notification_enable')) {
-                url.searchParams.set('win_notification_enable', win_notification_enable ? '1' : '0');
-                window.history.replaceState(window.history.state, '', url);
-            }
         }
 
         if (soundInput) {
@@ -286,6 +325,8 @@ if (saveBtn) {
             localStorage.setItem('wordgun_difficulty', wordgun_difficulty);
         }
 
+        clearFormUrlParams();
+
         // Генерируем ссылку для OBS
         generateObsLink();
 
@@ -306,10 +347,13 @@ function checkFormsValidity() {
 
 async function validateTwitchAcc(acc) {
     if (!channelInput) return;
+    const seq = ++validationSeq;
     channelInput.setCustomValidity("Проверяю...");
     channelInput.reportValidity();
+    checkFormsValidity();
     try {
         const user = await getTwitchUserData(acc);
+        if (seq !== validationSeq || acc !== channelInput.value.trim()) return;
         const avatarImg = document.getElementById('setting-avatar');
         if (user) {
             if (avatarImg) {
@@ -325,6 +369,7 @@ async function validateTwitchAcc(acc) {
         }
         channelInput.reportValidity();
     } catch (error) {
+        if (seq !== validationSeq || acc !== channelInput.value.trim()) return;
         console.error("Ошибка при проверке канала:", error);
         const avatarImg = document.getElementById('setting-avatar');
         if (avatarImg) {
@@ -343,6 +388,7 @@ if (channelInput) {
         checkFormsValidity();
 
         clearTimeout(validationTimeout);
+        validationSeq++;
 
         let channelName = channelInput.value.trim();
         if (channelName.includes('twitch.tv/')) {
@@ -362,18 +408,25 @@ if (channelInput) {
     });
 }
 
+const mainSettingsBox = document.querySelector('.main-settings-box');
+if (mainSettingsBox) {
+    const handleSettingsFormChange = () => {
+        generateObsLink();
+        checkFormsValidity();
+    };
+    mainSettingsBox.addEventListener('input', handleSettingsFormChange);
+    mainSettingsBox.addEventListener('change', handleSettingsFormChange);
+}
+
 if (restartInput) {
     restartInput.addEventListener("input", () => {
         restartInput.reportValidity();
-        checkFormsValidity();
     });
 }
 
 if (winSoundUrlInput) {
     winSoundUrlInput.addEventListener("input", () => {
         winSoundUrlInput.reportValidity();
-        generateObsLink();
-        checkFormsValidity();
     });
 }
 
@@ -386,31 +439,6 @@ document.getElementById('menu-button-settings').addEventListener('click', () => 
         loadWordgunOptions();
     }
 });
-
-if (avatarInput) {
-    avatarInput.addEventListener("input", () => {
-        checkFormsValidity();
-    });
-}
-
-if (soundInput) {
-    soundInput.addEventListener("input", () => {
-        checkFormsValidity();
-    });
-}
-
-if (winNotificationInput) {
-    winNotificationInput.addEventListener("input", () => {
-        generateObsLink();
-        checkFormsValidity();
-    });
-}
-
-if (manualGuessSettingInput) {
-    manualGuessSettingInput.addEventListener("input", () => {
-        checkFormsValidity();
-    });
-}
 
 // Show the wordgun-only settings and its warning (the API can be region-blocked
 // from some RU IPs) only while that backend is selected.
@@ -432,7 +460,11 @@ function updateBackendSettings() {
 // The tier id stands in for the label here: the real one is localized by the
 // server and only arrives with the option list, which replaces this option.
 function ensureSelectOption(select, value) {
-    if (!select || !value) return;
+    if (!select) return;
+    if (!value) {
+        select.value = '';
+        return;
+    }
     const exists = Array.from(select.options).some((option) => option.value === value);
     if (!exists) select.add(new Option(value, value));
     select.value = value;
@@ -472,15 +504,6 @@ if (gameBackendInput) {
     gameBackendInput.addEventListener("change", () => {
         updateBackendSettings();
         if (gameBackendInput.value === 'wordgun') loadWordgunOptions();
-        generateObsLink();
-        checkFormsValidity();
-    });
-}
-
-if (wordgunDifficultyInput) {
-    wordgunDifficultyInput.addEventListener("change", () => {
-        generateObsLink();
-        checkFormsValidity();
     });
 }
 
